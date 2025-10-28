@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ここで直接ユーティリティクラスを使ってもOK */
+body {
+  @apply bg-gray-50;
+}
