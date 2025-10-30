@@ -6,7 +6,7 @@ import { Map as LeafletMap } from "leaflet";
 interface MapContextType {
   stores: Store[];
   focusStore: (store: Store) => void;
-  mapRef: React.RefObject<HTMLDivElement | null>;
+  mapRef: React.RefObject<HTMLDivElement | null>; // ✅ HTMLDivElement だけでOK（nullを許可するRefObject自体がそういう設計）
   mapInstanceRef: React.MutableRefObject<LeafletMap | null>;
   isMapInitialized: boolean;
   setIsMapInitialized: React.Dispatch<React.SetStateAction<boolean>>;
@@ -34,7 +34,9 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     },
   ]);
 
-  const mapRef = useRef<HTMLDivElement>(null);
+  // 🔧 修正: useRef<HTMLDivElement>(null) → useRef<HTMLDivElement | null>(null)
+  const mapRef = useRef<HTMLDivElement | null>(null);
+
   const mapInstanceRef = useRef<LeafletMap | null>(null);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
@@ -47,11 +49,16 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   return (
     <MapContext.Provider
-      value={{ 
-        stores, focusStore,
-        mapRef, mapInstanceRef, 
-        isMapInitialized, setIsMapInitialized,
-        mapInstance, setMapInstance }}
+      value={{
+        stores,
+        focusStore,
+        mapRef, // 🔧 修正により型が一致
+        mapInstanceRef,
+        isMapInitialized,
+        setIsMapInitialized,
+        mapInstance,
+        setMapInstance,
+      }}
     >
       {children}
     </MapContext.Provider>
