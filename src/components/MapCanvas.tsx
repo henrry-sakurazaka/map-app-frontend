@@ -9,7 +9,7 @@ interface MapCanvasProps {
 }
 
 const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
-  const { mapRef, setMapInstance, mapInstanceRef, setIsMapInitialized } = useMapStore();
+  const { mapRef, setMapInstance, mapInstanceRef, setIsMapInitialized, selectedStore } = useMapStore();
 
   useEffect(() => {
     // ✅ すでにマップが存在する場合は再初期化しない
@@ -38,7 +38,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
       L.marker(center).addTo(map).bindPopup("中心点");
 
       const [lat, lon] = center as [number, number];
-      
+
       //Overpass API クエリ
       const query = `
       [out:json];
@@ -67,15 +67,29 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
     }
   }, [center]);
 
+  useEffect(() => {
+    if (selectedStore && mapInstanceRef.current) {
+      const { lat, lon } = selectedStore;
+      const map = mapInstanceRef.current;
+
+      L.marker([lat, lon])
+       .addTo(map)
+       .bindPopup(`<b>${selectedStore.name}</b>`)
+       .openPopup();
+
+      map.setView([lat, lon], 17);
+    }
+  }, [selectedStore]);
+
   return (
-    <div className="lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
-      <div
-        ref={mapRef}
-        id="map"
-        className="leaflet-container bg-gray-100"
-        style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
-      ></div>
-    </div>
+      <div className="lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
+        <div
+          ref={mapRef}
+          id="map"
+          className="leaflet-container bg-gray-100"
+          style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
+        ></div>
+      </div>
   );
 };
 

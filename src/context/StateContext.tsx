@@ -12,27 +12,17 @@ interface MapContextType {
   setIsMapInitialized: React.Dispatch<React.SetStateAction<boolean>>;
   mapInstance: LeafletMap | null;
   setMapInstance: (map: LeafletMap | null) => void;
+  setStores: React.Dispatch<React.SetStateAction<any[]>>;
+  // selectedStore: Store | null;
+  // setSelectedStore: React.Dispatch<React.SetStateAction<Store | null>>;
+  selectedStore: any;
+  setSelectedStore: (store: any) => void;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
 export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [stores] = useState<Store[]>([
-    {
-      id: 1,
-      name: "レトロ喫茶 モカ",
-      latitude: 35.6938,
-      longitude: 139.7034,
-      address: "東京都千代田区",
-    },
-    {
-      id: 2,
-      name: "地中海バル オリーブ",
-      latitude: 35.6828,
-      longitude: 139.7670,
-      address: "東京都千代田区丸の内",
-    },
-  ]);
+  const [stores, setStores] = useState<Store[]>([]);
 
   // 🔧 修正: useRef<HTMLDivElement>(null) → useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -40,12 +30,14 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const mapInstanceRef = useRef<LeafletMap | null>(null);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
   const focusStore = (store: Store) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([store.latitude, store.longitude], 14);
     }
   };
+
 
   return (
     <MapContext.Provider
@@ -58,6 +50,9 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setIsMapInitialized,
         mapInstance,
         setMapInstance,
+        setStores,
+        selectedStore,
+        setSelectedStore
       }}
     >
       {children}

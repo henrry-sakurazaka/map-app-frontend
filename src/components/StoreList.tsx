@@ -1,8 +1,13 @@
 import React from "react";
 import { useMapStore } from "../context/StateContext";
+import type { Store } from "../types/store";
 
 const StoreList: React.FC = () => {
-  const { stores, focusStore } = useMapStore();
+  const { stores, setSelectedStore } = useMapStore();
+
+  const handleClick = (store: Store) => {
+    setSelectedStore(store);
+  }
 
   return (
     <div className="lg:w-1/3 bg-gray-100 p-4 rounded-xl shadow-lg h-[60vh] lg:h-[70vh] overflow-y-auto">
@@ -16,7 +21,7 @@ const StoreList: React.FC = () => {
           <div
             key={store.id}
             className="p-3 mb-2 border border-gray-100 bg-white rounded-lg hover:bg-blue-50 hover:border-blue-200 cursor-pointer"
-            onClick={() => focusStore(store)}
+            onClick={() => handleClick(store)}
           >
             <h3 className="font-bold text-lg text-blue-600">{store.name}</h3>
             <p className="text-sm text-gray-500">{store.address}</p>
