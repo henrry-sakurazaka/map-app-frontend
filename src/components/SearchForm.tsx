@@ -20,61 +20,76 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
 
   // 🗾 国土地理院API
   const searchGSI = async (query: string): Promise<LocationResult[]> => {
-    console.log("🗾 国土地理院API検索:", query);
-    const url = `https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(
-      query
-    )}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("GSI request failed");
-    const data = await res.json();
-    return data.map((item: any) => ({
-      display_name: item.properties.title,
-      lat: item.geometry.coordinates[1].toString(),
-      lon: item.geometry.coordinates[0].toString(),
-    }));
+    try {
+      console.log("🗾 国土地理院API検索:", query);
+      const url = `https://msearch.gsi.go.jp/address-search/AddressSearch?q=${encodeURIComponent(query)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("GSI request failed");
+      const data = await res.json();
+      return data.map((item: any) => ({
+        display_name: item.properties.title,
+        lat: item.geometry.coordinates[1].toString(),
+        lon: item.geometry.coordinates[0].toString(),
+      }));
+    } catch (err) {
+      console.error("GSI検索エラー:", err);
+      return [];
+    }
   };
 
-  // 🌏 Nominatim（フォールバック）
+  // 🌍 Nominatim（フォールバック）
   const searchNominatim = async (query: string): Promise<LocationResult[]> => {
-    console.log("🌍 Nominatim検索:", query);
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-      query
-    )}&countrycodes=jp&addressdetails=1&limit=5&accept-language=ja`;
-    const res = await fetch(url, { headers: { "Accept-Language": "ja" } });
-    if (!res.ok) throw new Error("Nominatim request failed");
-    const data = await res.json();
-    return data.map((item: any) => ({
-      display_name: item.display_name,
-      lat: item.lat,
-      lon: item.lon,
-    }));
+    try {
+      console.log("🌍 Nominatim検索:", query);
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        query
+      )}&countrycodes=jp&addressdetails=1&limit=5&accept-language=ja`;
+      const res = await fetch(url, { headers: { "Accept-Language": "ja" } });
+      if (!res.ok) throw new Error("Nominatim request failed");
+      const data = await res.json();
+      return data.map((item: any) => ({
+        display_name: item.display_name,
+        lat: item.lat,
+        lon: item.lon,
+      }));
+    } catch (err) {
+      console.error("Nominatim検索エラー:", err);
+      return [];
+    }
   };
 
- const fetchAddress = async (lat: number, lon: number): Promise<string> => {
-  const url = `map-app-backend.up.railway.app/api/reverse-geocode?lat=${lat}&lon=${lon}`;
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    const addr = data.address;
-    if (addr) {
-      const parts = [
-        addr.state,
-        addr.city,
-        addr.town || addr.village,
-        addr.suburb || addr.neighbourhood,
-        addr.road,
-        addr.house_number,
-      ].filter(Boolean);
-      return parts.join(" ");
+  // 🏠 Reverse Geocode API (Rails経由)
+  const fetchAddress = async (lat: number, lon: number): Promise<string> => {
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
+    if (!baseUrl) {
+      console.warn("⚠️ VITE_API_BASE_URL が設定されていません");
+      return "住所不明";
+    }
+
+    const url = `${baseUrl}/api/reverse-geocode?lat=${lat}&lon=${lon}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Reverse geocode failed (${res.status})`);
+      const data = await res.json();
+      const addr = data.address;
+      if (addr) {
+        const parts = [
+          addr.state,
+          addr.city,
+          addr.town || addr.village,
+          addr.suburb || addr.neighbourhood,
+          addr.road,
+          addr.house_number,
+        ].filter(Boolean);
+        return parts.join(" ");
+      }
+    } catch (err) {
+      console.error("Reverse geocoding failed:", err);
     }
     return "住所不明";
-  } catch (err) {
-    console.error("Reverse geocoding failed:", err);
-    return "住所不明";
-  }
-};
+  };
 
-  // 🛰️ Overpass API：周辺POI取得（lat/lon安全対応）
+  // 🛰️ Overpass API
   const fetchOverpassPOIs = async (lat: number, lon: number, radius = 500) => {
     const query = `
       [out:json][timeout:25];
@@ -84,24 +99,28 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       );
       out center;
     `;
+    try {
+      const res = await fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        body: query,
+      });
+      if (!res.ok) throw new Error("Overpass API request failed");
 
-    const res = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      body: query,
-    });
-    if (!res.ok) throw new Error("Overpass API request failed");
-
-    const json = await res.json();
-    return (
-      json.elements
-        ?.map((el: any) => ({
-          ...el,
-          lat: el.lat || el.center?.lat,
-          lon: el.lon || el.center?.lon,
-          tags: el.tags || {},
-        }))
-        .filter((el: any) => el.lat && el.lon) || []
-    );
+      const json = await res.json();
+      return (
+        json.elements
+          ?.map((el: any) => ({
+            ...el,
+            lat: el.lat || el.center?.lat,
+            lon: el.lon || el.center?.lon,
+            tags: el.tags || {},
+          }))
+          .filter((el: any) => el.lat && el.lon) || []
+      );
+    } catch (err) {
+      console.error("Overpass取得エラー:", err);
+      return [];
+    }
   };
 
   // 🔍 検索処理
@@ -117,13 +136,11 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
         query = "福岡市中央区 " + query;
       }
 
-      // 🗾 位置検索
       let data = await searchGSI(query);
-      if (!data || data.length === 0) data = await searchNominatim(query);
+      if (data.length === 0) data = await searchNominatim(query);
 
       if (data.length === 0) {
         setError("地域を特定できませんでした。");
-        setLoading(false);
         return;
       }
 
@@ -131,16 +148,20 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       const lat = parseFloat(first.lat);
       const lon = parseFloat(first.lon);
 
-      console.log("✅ 検索成功:", first.display_name);
+      if (isNaN(lat) || isNaN(lon)) {
+        console.error("❌ 緯度経度が不正:", first);
+        setError("座標の取得に失敗しました。");
+        return;
+      }
+
+      console.log("✅ 検索成功:", first.display_name, lat, lon);
       onSearch(lat, lon);
 
-      // 🏪 POI取得
       const pois = await fetchOverpassPOIs(lat, lon);
-      console.log("🟢 Overpass POIs:", pois.length, pois.slice(0, 3));
+      console.log("🟢 Overpass POIs:", pois.length);
 
-      // 🏠 店舗データ生成（上位10件のみ住所補完）
       const stores: Store[] = await Promise.all(
-        pois.slice(0, 10).map(async (poi: any, idx: number) => {
+        pois.slice(0, 20).map(async (poi: any, idx: number) => {
           const name = poi.tags.name || poi.tags.brand || "名称不明";
           const address =
             poi.tags["addr:full"] ||
