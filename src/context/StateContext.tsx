@@ -17,6 +17,14 @@ interface MapContextType {
   // setSelectedStore: React.Dispatch<React.SetStateAction<Store | null>>;
   selectedStore: any;
   setSelectedStore: (store: any) => void;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  cache: Map<string, any>;
+  setCache: React.Dispatch<React.SetStateAction<Map<string, any>>>;
+  cacheOn: boolean;
+  setCacheOn: React.Dispatch<React.SetStateAction<boolean>>;
+  storeWeb: Map<string, any>;
+  setStoreWeb: React.Dispatch<React.SetStateAction<Map<string, any>>>;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -31,7 +39,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
-
+  const [loading, setLoading] = useState(false);
+  const [cache, setCache] = useState<Map<string, any>>(new Map());
+  const [cacheOn, setCacheOn] = useState<boolean>(false);
+  const [storeWeb, setStoreWeb] = useState<Map<string, any>>(new Map);
   const focusStore = (store: Store) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([store.latitude, store.longitude], 14);
@@ -52,7 +63,15 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setMapInstance,
         setStores,
         selectedStore,
-        setSelectedStore
+        setSelectedStore,
+        loading,
+        setLoading,
+        cache,
+        setCache,
+        cacheOn,
+        setCacheOn,
+        storeWeb,
+        setStoreWeb,
       }}
     >
       {children}

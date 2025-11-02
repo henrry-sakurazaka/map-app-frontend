@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 import { useMapStore } from "../context/StateContext";
 import type { Store } from "../types/store";
 
@@ -14,10 +14,13 @@ interface LocationResult {
 
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const { setStores } = useMapStore();
+  const [history, setHistory] = useState<string[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
 
+  const { stores, setStores, loading, setLoading, cache, setCache, setCacheOn } = useMapStore();
+  
+  
   // 🗾 国土地理院API
   const searchGSI = async (query: string): Promise<LocationResult[]> => {
     try {
@@ -123,77 +126,104 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     }
   };
 
-  // 🔍 検索処理
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!input.trim()) return;
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError("");
+  if (!input.trim()) return;
+  setLoading(true);
 
-    try {
-      let query = input.trim();
-      if (!query.includes("中央区") && !query.includes("福岡市")) {
-        query = "福岡市中央区 " + query;
-      }
+  const key = input.trim();      // キャッシュキー
+  if (!key) return;
 
-      let data = await searchGSI(query);
-      if (data.length === 0) data = await searchNominatim(query);
+  setHistory(prev => {
+    const newHistory = [key, ...prev.filter(h => h !== key)];
+    return newHistory.slice(0, 5);  //最新5件の検索履歴
+  });
 
-      if (data.length === 0) {
-        setError("地域を特定できませんでした。");
-        return;
-      }
-
-      const first = data[0];
-      const lat = parseFloat(first.lat);
-      const lon = parseFloat(first.lon);
-
-      if (isNaN(lat) || isNaN(lon)) {
-        console.error("❌ 緯度経度が不正:", first);
-        setError("座標の取得に失敗しました。");
-        return;
-      }
-
-      console.log("✅ 検索成功:", first.display_name, lat, lon);
-      onSearch(lat, lon);
-
-      const pois = await fetchOverpassPOIs(lat, lon);
-      console.log("🟢 Overpass POIs:", pois.length);
-
-      const stores: Store[] = await Promise.all(
-        pois.slice(0, 20).map(async (poi: any, idx: number) => {
-          const name = poi.tags.name || poi.tags.brand || "名称不明";
-          const address =
-            poi.tags["addr:full"] ||
-            poi.tags["addr:street"] ||
-            (await fetchAddress(poi.lat, poi.lon));
-
-          return {
-            id: idx + 1,
-            name,
-            latitude: poi.lat,
-            longitude: poi.lon,
-            address,
-          };
-        })
-      );
-
-      setStores(stores);
-    } catch (err) {
-      console.error("❌ handleSubmit Error:", err);
-      setError("検索中にエラーが発生しました。");
-    } finally {
+  try {
+    // まずキャッシュをチェック
+    if (cache.has(key)) {
+      console.log("✅ キャッシュヒット:", key);
+      setStores(cache.get(key)!);
       setLoading(false);
+      return; 
     }
-  };
+
+    // 国土地理院API→Nominatim→座標取得
+    let data = await searchGSI(key);
+    if (!data.length) data = await searchNominatim(key);
+    if (!data.length) {
+      setError("地域を特定できませんでした。");
+      setLoading(false);
+      return;
+    }
+
+    const { lat, lon } = data[0];
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lon);
+    onSearch(latitude, longitude);
+
+    // Overpass API で店舗取得
+    const pois = await fetchOverpassPOIs(latitude, longitude);
+    console.log("🟢 Overpass POIs:", pois.length);
+
+    const stores: Store[] = await Promise.all(
+      pois.slice(0, 20).map(async (poi: any, idx: number) => {
+        const name = poi.tags.name || poi.tags.brand || "名称不明";
+        const address =
+          poi.tags["addr:full"] ||
+          poi.tags["addr:street"] ||
+          (await fetchAddress(poi.lat, poi.lon));
+        const website =
+         poi.tags.website || poi.tags.url || poi.tags["contact:website"] || null;
+
+        return {
+          id: idx + 1,
+          name,
+          latitude: poi.lat,
+          longitude: poi.lon,
+          address,
+          website,
+        };
+      })
+    );
+
+    // 結果をセット＆キャッシュ保存
+    setStores(stores);
+    setCache(new Map(cache).set(key, stores));
+    setCacheOn(true);
+  } catch (err) {
+    console.error("❌ handleSubmit Error:", err);
+    setError("検索中にエラーが発生しました。");
+  } finally {
+    setLoading(false);
+    // input は消さない
+    // setInput(""); は呼ばない
+  }
+};
+
+ const handleHistoryClick = (query: string) => {
+    setInput(query);
+    handleSubmit(new Event("submit") as any);
+  }
+
+const cacheDisplay = () => {
+    stores ? setStores([]) :
+    setCacheOn(true);
+}
+
+
+
 
   return (
     <div className="relative mt-6 mb-8">
-      <form onSubmit={handleSubmit} className="flex items-center gap-2">
+      <form onSubmit={handleSubmit} className="flex items-center gap-2 z-[100]">
         <input
           type="text"
           placeholder="地域名を入力（例: 東京都千代田区丸の内）"
           value={input}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           onChange={(e) => setInput(e.target.value)}
           className="border border-gray-300 rounded-lg px-4 py-2 w-[480px] focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -203,9 +233,23 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
           className={`${
             loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
           } text-white px-4 py-2 rounded-lg transition`}
+          onClick={() => cacheDisplay()}
         >
           {loading ? "検索中…" : "検索"}
         </button>
+         {!input && isFocused && history.length > 0 && (
+            <ul className="absolute bg-white border w-[480px] mt-80 rounded shadow z-[1500] ">
+                {history.map((q, idx) => (
+                <li
+                    key={idx}
+                    onMouseDown={() => handleHistoryClick(q)} 
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                >
+                    {q}
+                </li>
+                ))}
+            </ul>
+            )}
       </form>
 
       {error && <p className="text-red-500 mt-2">{error}</p>}

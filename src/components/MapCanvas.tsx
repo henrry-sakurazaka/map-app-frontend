@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import type { LatLngExpression } from "leaflet";
 import { useMapStore } from "../context/StateContext";
 import "leaflet/dist/leaflet.css";
-import MapWrapper from "./MapComponent";
 
 interface MapCanvasProps {
   center?: LatLngExpression;
@@ -11,81 +10,87 @@ interface MapCanvasProps {
 
 const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
   const { mapRef, setMapInstance, mapInstanceRef, setIsMapInitialized, selectedStore } = useMapStore();
-  const markersRef = React.useRef<L.LayerGroup | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
 
+  // --- ✅ 初期化 ---
   useEffect(() => {
-    // ✅ すでにマップが存在する場合は再初期化しない
     if (!mapRef.current || mapInstanceRef.current) return;
 
     const timer = setTimeout(() => {
-       if (!mapRef.current) return;
-       const map = L.map(mapRef.current).setView([36.2048, 138.2529], 6);
+      if (!mapRef.current) return;
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
+      const map = L.map(mapRef.current).setView([36.2048, 138.2529], 6);
 
-        mapInstanceRef.current = map;
-        setMapInstance(map);
-        setIsMapInitialized(true);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
 
-        setTimeout(() => map.invalidateSize(), 200);
-     }, 100)
-     return () => clearTimeout(timer);
-  }, []);
+      markersRef.current = L.layerGroup().addTo(map);
 
+      mapInstanceRef.current = map;
+      setMapInstance(map);
+      setIsMapInitialized(true);
 
-   
-   
-  // centerが来たときだけ移動＆マーカー再設置
+      // ✅ Leaflet表示のズレ対策
+      setTimeout(() => map.invalidateSize(), 200);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [mapRef, mapInstanceRef]);
+
+  // --- ✅ center（中心座標）が更新されたとき ---
   useEffect(() => {
-    if (center && mapInstanceRef.current) {
-      const map = mapInstanceRef.current;
-      map.eachLayer((layer: any) => {
-        if (layer instanceof L.Marker) map.removeLayer(layer);
-      });
-      L.marker(center).addTo(map).bindPopup("中心点");
+    if (!center || !mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
 
-      const [lat, lon] = center as [number, number];
+    // 既存マーカー削除
+    map.eachLayer((layer: any) => {
+      if (layer instanceof L.Marker) map.removeLayer(layer);
+    });
 
-      //Overpass API クエリ
-      const query = `
+    L.marker(center).addTo(map).bindPopup("中心点");
+
+    const [lat, lon] = center as [number, number];
+
+    // Overpass API クエリ
+    const query = `
       [out:json];
       node["shop"](around:1000,${lat},${lon});
       out;
-      `
-      fetch("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        body: query,
-      })
-       .then((res) => res.json()
-       .then((data) => {
+    `;
+
+    fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      body: query,
+    })
+      .then((res) => res.json())
+      .then((data) => {
         data.elements.forEach((el: any) => {
-          if(el.type === "node") {
+          if (el.type === "node") {
             const { lat, lon, tags } = el;
             const name = tags.name || tags.shop || "店舗";
-            L.marker([lat, lon]) 
-             .addTo(map)
-             .bindPopup(`<b>${name}</b><br>${tags.shop || ""}`);
+            L.marker([lat, lon])
+              .addTo(map)
+              .bindPopup(`<b>${name}</b><br>${tags.shop || ""}`);
           }
         });
-       })
-      )
+      })
       .catch((err) => console.error("Overpass API Error:", err));
-      map.setView(center, 16);
-    }
+
+    map.setView(center, 16);
   }, [center]);
 
+  // --- ✅ selectedStore（店舗選択）が更新されたとき ---
   useEffect(() => {
-    if (!mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
+    if (!map) return;
 
-    // LayerGroup 初期化
     if (!markersRef.current) {
       markersRef.current = L.layerGroup().addTo(map);
     }
+
     const markers = markersRef.current;
-    markers.clearLayers(); // 既存マーカー削除
+    markers.clearLayers();
 
     if (selectedStore) {
       const { latitude, longitude, name } = selectedStore;
@@ -97,75 +102,18 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
         map.setView([latitude, longitude], 17);
       }
     }
-  }, [selectedStore, mapInstanceRef.current]);
-
-  useEffect(() => {
-    console.log("selectedStore", selectedStore);
-  }, [selectedStore])
-
-
-//   useEffect(() => {
-//   if (selectedStore && mapInstanceRef.current) {
-//     const { lat, lon, name } = selectedStore;
-//     const map = mapInstanceRef.current;
-
-//     if (lat !== undefined && lon !== undefined) {
-//       // マーカー用 LayerGroup を使うと削除が簡単
-//       if (!markersRef.current) {
-//         markersRef.current = L.layerGroup().addTo(map);
-//       }
-//       const markers = markersRef.current;
-//       markers.clearLayers(); // 以前のマーカーを削除
-
-//       // 新しいマーカーを追加
-//       L.marker([lat, lon])
-//         .addTo(markers)
-//         .bindPopup(`<b>${name}</b>`)
-//         .openPopup();
-
-//       map.setView([lat, lon], 17); // マップを移動
-//     }
-//   }
-// }, [selectedStore, mapInstanceRef.current]);
-
-
-  // useEffect(() => {
-  //   if (selectedStore && mapInstanceRef.current) {
-  //     const { lat, lon } = selectedStore;
-  //     const map = mapInstanceRef.current;
-
-  //     if (lat !== undefined && lon !== undefined) {
-  //       L.marker([lat, lon])
-  //       .addTo(map)
-  //       .bindPopup(`<b>${selectedStore.name}</b>`)
-  //       .openPopup();
-
-  //       map.setView([lat, lon], 17);
-  //     }
-     
-  //   }
-  // }, [selectedStore]);
+  }, [selectedStore]); 
 
   return (
-    <>
-        {selectedStore ? (
-          <MapWrapper/>
-        ):
-        (
-          <div className="lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
-          <div
-            ref={mapRef}
-            id="map"
-            className="leaflet-container bg-gray-100"
-            style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
-          ></div>
-        </div>
-        )
-      }
-    </>
-      
+    <div className="lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
+      <div
+        ref={mapRef}
+        id="map"
+        className="leaflet-container bg-gray-100"
+        style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
+      ></div>
+    </div>
   );
 };
 
 export default MapCanvas;
-

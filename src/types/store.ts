@@ -14,4 +14,6 @@ export interface Store {
 
   /** 店舗住所 */
   address: string;
+
+  website?: string | null;
 }
