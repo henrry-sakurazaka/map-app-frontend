@@ -16,4 +16,14 @@ export interface Store {
   address: string;
 
   website?: string | null;
+
+  ogp: OGPData;
+}
+
+export interface OGPData {
+  title: string;
+  description: string;
+  image: string;
+  url: string | null;
+  ogp?: OGPData;
 }

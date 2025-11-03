@@ -34,7 +34,6 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // 🔧 修正: useRef<HTMLDivElement>(null) → useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<HTMLDivElement | null>(null);
-
   const mapInstanceRef = useRef<LeafletMap | null>(null);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
