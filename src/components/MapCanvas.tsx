@@ -9,12 +9,17 @@ interface MapCanvasProps {
 }
 
 const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
-  const { mapRef, setMapInstance, mapInstanceRef, setIsMapInitialized, selectedStore } = useMapStore();
+  const { mapRef, setMapInstance, mapInstanceRef,
+     setIsMapInitialized, selectedStore,
+     ogpData,
+     } = useMapStore();
   const markersRef = useRef<L.LayerGroup | null>(null);
 
   // --- ✅ 初期化 ---
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
+    
+    window.addEventListener("resize", () => mapInstanceRef.current?.invalidateSize());
 
     const timer = setTimeout(() => {
       if (!mapRef.current) return;
@@ -104,14 +109,17 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
     }
   }, [selectedStore]); 
 
+
   return (
     <div className="lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
-      <div
-        ref={mapRef}
-        id="map"
-        className="leaflet-container bg-gray-100"
-        style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
-      ></div>
+      <div id="share-target">
+        <div
+          ref={mapRef}
+          id="map"
+          className="leaflet-container bg-gray-100"
+          style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
+        ></div>
+      </div>    
     </div>
   );
 };

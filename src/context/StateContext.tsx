@@ -3,6 +3,14 @@ import type { ReactNode } from "react";
 import type { Store } from "../types/store";
 import { Map as LeafletMap } from "leaflet";
 
+// ✅ OGPデータ型を定義
+export interface OGPData {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+}
+
 interface MapContextType {
   stores: Store[];
   focusStore: (store: Store) => void;
@@ -25,6 +33,8 @@ interface MapContextType {
   setCacheOn: React.Dispatch<React.SetStateAction<boolean>>;
   storeWeb: Map<string, any>;
   setStoreWeb: React.Dispatch<React.SetStateAction<Map<string, any>>>;
+  ogpData: OGPData | null;
+  setOgpData: React.Dispatch<React.SetStateAction<OGPData | null>>;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -42,6 +52,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [cache, setCache] = useState<Map<string, any>>(new Map());
   const [cacheOn, setCacheOn] = useState<boolean>(false);
   const [storeWeb, setStoreWeb] = useState<Map<string, any>>(new Map);
+  const [ogpData, setOgpData] = useState<OGPData | null>(null);
   const focusStore = (store: Store) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([store.latitude, store.longitude], 14);
@@ -71,6 +82,8 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setCacheOn,
         storeWeb,
         setStoreWeb,
+        ogpData,
+        setOgpData,
       }}
     >
       {children}

@@ -1,7 +1,8 @@
 import React from "react";
-import { useState } from "react";
 import { useMapStore } from "../context/StateContext";
+import html2canvas from "html2canvas";
 import type { Store } from "../types/store";
+
 
 type OGPData = {
   title: string;
@@ -44,8 +45,7 @@ const sampleStores: Store[] = [
 
 
 const StoreList: React.FC = () => {
-  const { stores, selectedStore, setSelectedStore, loading } = useMapStore();
-  const [ogpData, setOgpData] = useState<OGPData | null>(null);
+  const { stores, selectedStore, setSelectedStore, loading, ogpData, setOgpData } = useMapStore();
   const allStores = [...sampleStores, ...stores];
 
   const fetchWebsiteFromDuckDuckGo = async (storeName: string): Promise<string | null> => {
@@ -61,43 +61,90 @@ const StoreList: React.FC = () => {
   }
 };
 
-   const fetchOgp = async (url: string) => {
+  const fetchOgp = async (url: string) => {
     const res = await fetch(`/api/ogp_preview?url=${encodeURIComponent(url)}`);
     const data = await res.json();
     setOgpData(data);
   }
-  
-    const handleClick = async (store: Store) => {
-      // 店舗を選択状態にする
-      setSelectedStore(store);
 
-      // ✅ もしクリックされた店舗が sampleStores 内に存在するなら
-      const isSampleStore = sampleStores.some(s => s.id === store.id);
+  const handleCopyMapImage = async () => {
+    const target = document.getElementById("share-target");
+    if (!target) {
+      alert("コピー対象が見つかりません。");
+      return;
+    }
 
-      if (isSampleStore && store.ogp) {
-        // サンプルデータは即 OGP 表示（fetch不要）
-        setOgpData(store.ogp as OGPData);
-        return; // ここで終了（余計なAPI呼び出しを防ぐ）
+    try {
+      const canvas = await html2canvas(target, {
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        scale: 2,
+      });
+
+      // --- Clipboard API 対応チェック ---
+      if (navigator.clipboard && window.ClipboardItem) {
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+
+          try {
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            alert("地図+OGP画像をクリップボードにコピーしました!");
+          } catch (err) {
+            fallbackDownload(canvas);
+          }
+        });
+      } else {
+        // Clipboard API が使えない場合はダウンロードにフォールバック
+        fallbackDownload(canvas);
       }
 
-      // ✅ OGPを持っていればセット
-      if (store.ogp) {
-        setOgpData(store.ogp as OGPData);
-      } 
-      // ✅ ウェブサイトがない場合のみDuckDuckGoとOGP取得
-      else if (!store.website) {
-        const site = await fetchWebsiteFromDuckDuckGo(store.name);
-        if (site) {
-          fetchOgp(site);
-          setSelectedStore({ ...store, website: site });
-        } else {
-          setOgpData(null);
-        }
+    } catch (err) {
+      console.error("html2canvas で失敗:", err);
+      alert("コピーに失敗しました");
+    }
+  };
+
+// --- ダウンロードにフォールバック ---
+  const fallbackDownload = (canvas: HTMLCanvasElement) => {
+    const link = document.createElement("a");
+    link.href = canvas.toDataURL("image/png");
+    link.download = "map_ogp.png";
+    link.click();
+    alert("Clipboard API非対応のため、画像をダウンロードしました。");
+  };
+
+  const handleClick = async (store: Store) => {
+    // 店舗を選択状態にする
+    setSelectedStore(store);
+
+    // ✅ もしクリックされた店舗が sampleStores 内に存在するなら
+    const isSampleStore = sampleStores.some(s => s.id === store.id);
+
+    if (isSampleStore && store.ogp) {
+      // サンプルデータは即 OGP 表示（fetch不要）
+      setOgpData(store.ogp as OGPData);
+      return; // ここで終了（余計なAPI呼び出しを防ぐ）
+    }
+
+    // ✅ OGPを持っていればセット
+    if (store.ogp) {
+      setOgpData(store.ogp as OGPData);
+    } 
+    // ✅ ウェブサイトがない場合のみDuckDuckGoとOGP取得
+    else if (!store.website) {
+      const site = await fetchWebsiteFromDuckDuckGo(store.name);
+      if (site) {
+        fetchOgp(site);
+        setSelectedStore({ ...store, website: site });
       } else {
-        // それ以外はOGPなし
         setOgpData(null);
       }
-    };
+    } else {
+      // それ以外はOGPなし
+      setOgpData(null);
+    }
+  };
 
   
   const handleBack = () => {
@@ -131,6 +178,15 @@ const StoreList: React.FC = () => {
                 ) : (
                   <p className="text-gray-400 text-sm">サイト情報なし</p>
                 )}
+                 {/* --- ✅ シェアボタン --- */}
+                <div className="flex justify-end mt-4 px-2">
+                  <button
+                    onClick={handleCopyMapImage}
+                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all"
+                  >
+                    地図+OGPをコピー
+                  </button>
+                </div>
               </div>
               {ogpData ? (
                   <div className="mt-4 border rounded-lg p-3 bg-white shadow">
