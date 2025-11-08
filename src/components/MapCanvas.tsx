@@ -11,7 +11,6 @@ interface MapCanvasProps {
 const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
   const { mapRef, setMapInstance, mapInstanceRef,
      setIsMapInitialized, selectedStore,
-     ogpData,
      } = useMapStore();
   const markersRef = useRef<L.LayerGroup | null>(null);
 
