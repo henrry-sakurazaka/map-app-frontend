@@ -36,20 +36,25 @@ export async function loginUser(email: string, password: string): Promise<LoginR
 // お試しログイン
 // ----------------------
 // 🚨 修正1: 戻り値の型を User から LoginResponse に変更
+
 export async function loginGuest(): Promise<LoginResponse> {
+  const token = localStorage.getItem("authToken");
   const res = await fetch("http://localhost:3001/api/v1/auth/guest", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } = await res.json();
 
   if (res.ok && json.user && json.token) {
-    // 🚨 修正2: localStorage への保存を削除
-    // localStorage.setItem("authToken", json.token);
-    // localStorage.setItem("authUser", JSON.stringify(json.user));
-    
-    // 🚨 修正3: { user, token } オブジェクト全体を返却
+
+    // ✔ トークン保存必須
+    localStorage.setItem("authToken", json.token);
+    localStorage.setItem("authUser", JSON.stringify(json.user));
+
     return { user: json.user, token: json.token };
   } else {
     throw new Error(json.error || json.errors?.join(", ") || "Guest login failed");

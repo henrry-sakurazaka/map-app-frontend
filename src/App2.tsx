@@ -6,57 +6,43 @@ import Dashboad from "./Dashboad";
 
 const App2: React.FC = () => {
   const navigate = useNavigate();
-  // token も useAuth から取得する
   const { user, token, login, logout } = useAuth(); 
   const [loading, setLoading] = useState(true);
   const [authValid, setAuthValid] = useState(false);
 
+  // ① localStorage から復元
   useEffect(() => {
-    // 既に Context に user と authValid があれば、チェック不要（リロード時を除く）
-    if (user && authValid) {
-      setLoading(false);
-      return;
+    const storedToken = localStorage.getItem("authToken");
+    const storedUser = localStorage.getItem("authUser");
+
+    if (storedToken && storedUser) {
+      login(JSON.parse(storedUser), storedToken);
     }
-    
-    // 1. トークンがない場合、即座に未認証と判断
-    if (!token) {
-      console.error("未ログイン: トークンなし");
-      logout();
-      setAuthValid(false);
+  }, [login]);
+
+  useEffect(() => {
+    // Contextにuserがいればゲストも含めてチェック不要
+    if (user) {
+      setAuthValid(true);
       setLoading(false);
-      navigate("/");
       return;
     }
 
-    // 2. トークンがある場合、APIを叩いて有効性を確認する
-    const checkAuthStatus = async () => {
+    // ゲストログイン用 API
+    const loginGuest = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/v1/auth/current_user", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`, 
-            "Content-Type": "application/json",
-          },
+        const res = await fetch("http://localhost:3001/api/v1/auth/guest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          // APIから返されたユーザー情報と、既存のトークンでログイン状態を更新
-          // AuthProviderのloginはlocalStorageに保存する処理も含む
-          login(data, token); 
-          setAuthValid(true);
-        } else if (response.status === 401) {
-          // トークンが無効/期限切れの場合
-          console.error("認証失敗: トークン無効/期限切れ");
-          logout();
-          setAuthValid(false);
-          navigate("/");
-        } else {
-          // その他のAPIエラー
-          throw new Error(`APIエラー: ${response.status}`);
-        }
+        if (!res.ok) throw new Error("Guest login failed");
+
+        const data = await res.json();
+        login(data.user, data.token);  // context に保存
+        setAuthValid(true);
       } catch (error) {
-        console.error("認証チェック中にエラーが発生:", error);
+        console.error("ゲストログインエラー:", error);
         logout();
         setAuthValid(false);
         navigate("/");
@@ -65,19 +51,42 @@ const App2: React.FC = () => {
       }
     };
 
-    checkAuthStatus();
-  }, [token, navigate, login, logout]); 
-  
-  // ゲスト判定ロジックを定義
-  // ユーザーオブジェクトが確定した後に実行されます。
-  const isGuest = user?.email === "no_email_guest@example.com"; 
+    // トークンがあれば current_user をチェック、それ以外はゲストログイン
+    if (token) {
+      const checkCurrentUser = async () => {
+        try {
+          const res = await fetch("http://localhost:3001/api/v1/auth/current_user", {
+            method: "GET",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            login(data, token);
+            setAuthValid(true);
+          } else {
+            console.warn("Current user 無効。ゲストログインに切替");
+            await loginGuest();
+          }
+        } catch (error) {
+          console.error("認証チェック中にエラー:", error);
+          await loginGuest();
+        } finally {
+          setLoading(false);
+        }
+      };
+      checkCurrentUser();
+    } else {
+      loginGuest();
+    }
+  }, [token, navigate, login, logout, user]);
 
   if (loading) return <p>認証チェック中...</p>;
 
-  // ★ 最終的なレンダーロジックを修正 ★
-  // authValidがtrue (本登録ユーザー) または isGuestがtrue (ゲストユーザー) の場合に
-  // ダッシュボードを表示する
-  return (authValid || isGuest) && user ? <Dashboad /> : <p>ログイン情報が無効です</p>;
+  return authValid && user ? <Dashboad /> : <p>ログイン情報が無効です</p>;
 };
 
 export default App2;
