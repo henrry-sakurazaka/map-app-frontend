@@ -104,7 +104,7 @@ export async function loginOAuth(provider: OAuthProvider, code: string): Promise
   // 注意: この関数は旧式のフロー（codeを使ってフロントからAPIを叩く）であるため、
   // 以前議論した新しいフロー（Railsがリダイレクトでトークンを渡す）に移行することが強く推奨されます。
   
-  const res = await fetch(`http://localhost:3001/api/v1/auth/${provider}/callback`, {
+  const res = await fetch(`https://dev-auth.offsetcodecraft.site/api/v1/auth/${provider}/callback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code }),
@@ -124,102 +124,3 @@ export async function loginOAuth(provider: OAuthProvider, code: string): Promise
   }
 }
 
-// import type { User } from "../types/types";
-// import type { OAuthProvider } from "../types/OAuthProvider";
-
-
-// export interface LoginResponse {
-//   user: User;
-//   token: string;
-// }
-
-// // ----------------------
-// // ログイン
-// // ----------------------
-// export async function loginUser(email: string, password: string): Promise<User> {
-//   const res = await fetch("http://localhost:3001/api/v1/auth/login", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({ email, password }),
-//   });
-
-//   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } = await res.json();
-
-//   if (res.ok && json.user && json.token) {
-//     localStorage.setItem("authToken", json.token);
-//     localStorage.setItem("authUser", JSON.stringify(json.user));
-//     return json.user;
-//   } else {
-//     throw new Error(json.error || json.errors?.join(", ") || "Login failed");
-//   }
-// }
-
-// // ----------------------
-// // お試しログイン
-// // ----------------------
-// export async function loginGuest(): Promise<User> {
-//   const res = await fetch("http://localhost:3001/api/v1/auth/guest", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//   });
-
-//   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } = await res.json();
-
-//   if (res.ok && json.user && json.token) {
-//     localStorage.setItem("authToken", json.token);
-//     localStorage.setItem("authUser", JSON.stringify(json.user));
-//     return json.user;
-//   } else {
-//     throw new Error(json.error || json.errors?.join(", ") || "Guest login failed");
-//   }
-// }
-
-// // ----------------------
-// // サインアップ
-// // ----------------------
-// export async function registerUser(
-//   name: string,
-//   email: string,
-//   password: string
-// ): Promise<User> {
-//   const res = await fetch("http://localhost:3001/api/v1/auth/register", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       user: { name, email, password, password_confirmation: password },
-//     }),
-//   });
-
-//   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } = await res.json();
-
-//   if (res.ok && json.user) {
-//     if (json.token) {
-//       localStorage.setItem("authToken", json.token);
-//       localStorage.setItem("authUser", JSON.stringify(json.user));
-//     }
-//     return json.user;
-//   } else {
-//     throw new Error(json.error || json.errors?.join(", ") || "Sign up failed");
-//   }
-// }
-
-// // ----------------------
-// // OAuthログイン
-// // ----------------------
-// export async function loginOAuth(provider: OAuthProvider, code: string): Promise<User> {
-//   const res = await fetch(`http://localhost:3001/api/v1/auth/${provider}/callback`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({ code }),
-//   });
-
-//   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } = await res.json();
-
-//   if (res.ok && json.user && json.token) {
-//     localStorage.setItem("authToken", json.token);
-//     localStorage.setItem("authUser", JSON.stringify(json.user));
-//     return json.user;
-//   } else {
-//     throw new Error(json.error || json.errors?.join(", ") || "OAuth login failed");
-//   }
-// }

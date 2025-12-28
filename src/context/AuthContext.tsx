@@ -24,13 +24,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   // ページリロード時に localStorage から復元
   useEffect(() => {
-    if (token) {
-      setToken(token);
-      // 必要なら API でユーザー情報を取得して user を復元
-      const savedUser = localStorage.getItem("authUser");
-      if (savedUser) setUser(JSON.parse(savedUser));
+    // if (token) {
+    //   setToken(token);
+    //   // 必要なら API でユーザー情報を取得して user を復元
+    //   const savedUser = localStorage.getItem("authUser");
+    //   if (savedUser) setUser(JSON.parse(savedUser));
+    // }
+    const savedToken = localStorage.getItem("authToken");
+    const savedUser = localStorage.getItem("authUser");
+
+    if (savedToken) {
+      setToken(savedToken);
     }
-  }, [token]);
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
 
   const login = (user: User, token: string) => {
     setUser(user);

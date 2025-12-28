@@ -9,7 +9,8 @@ const App2: React.FC = () => {
   const { user, token, login, logout } = useAuth(); 
   const [loading, setLoading] = useState(true);
   const [authValid, setAuthValid] = useState(false);
-
+  // const API_BASE = "https://dev-auth.offsetcodecraft.site";
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost: 3001";;
   // ① localStorage から復元
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
@@ -18,20 +19,22 @@ const App2: React.FC = () => {
     if (storedToken && storedUser) {
       login(JSON.parse(storedUser), storedToken);
     }
-  }, [login]);
+  }, []);
 
   useEffect(() => {
-    // Contextにuserがいればゲストも含めてチェック不要
+     //Contextにuserがいればゲストも含めてチェック不要
     if (user) {
       setAuthValid(true);
       setLoading(false);
       return;
     }
+  }, [user])
 
+  useEffect(() => {
     // ゲストログイン用 API
     const loginGuest = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/v1/auth/guest", {
+        const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
@@ -55,7 +58,7 @@ const App2: React.FC = () => {
     if (token) {
       const checkCurrentUser = async () => {
         try {
-          const res = await fetch("http://localhost:3001/api/v1/auth/current_user", {
+          const res = await fetch(`${API_BASE}/api/v1/auth/current_user`, {
             method: "GET",
             headers: {
               "Authorization": `Bearer ${token}`,
@@ -82,7 +85,7 @@ const App2: React.FC = () => {
     } else {
       loginGuest();
     }
-  }, [token, navigate, login, logout, user]);
+  }, []);
 
   if (loading) return <p>認証チェック中...</p>;
 
