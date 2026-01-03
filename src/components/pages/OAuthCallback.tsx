@@ -29,11 +29,11 @@ export const OAuthCallback: React.FC = () => {
 
     const token = getTokenFromLocation(); // string | undefined
 
-    // デバッグ出力
-    console.info("=== OAuthCallback: location.href ===", window.location.href);
-    console.info("=== OAuthCallback: search ===", window.location.search);
-    console.info("=== OAuthCallback: hash ===", window.location.hash);
-    console.info("=== OAuthCallback: extracted token ===", token);
+    // // デバッグ出力
+    // console.info("=== OAuthCallback: location.href ===", window.location.href);
+    // console.info("=== OAuthCallback: search ===", window.location.search);
+    // console.info("=== OAuthCallback: hash ===", window.location.hash);
+    // console.info("=== OAuthCallback: extracted token ===", token);
 
     // Headers を Record<string,string> で型を固定
     const headers: Record<string, string> = {
