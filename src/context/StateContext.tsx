@@ -3,6 +3,14 @@ import type { ReactNode } from "react";
 import type { Store } from "../types/store";
 import { Map as LeafletMap } from "leaflet";
 
+// ✅ OGPデータ型を定義
+export interface OGPData {
+  title?: string;
+  description?: string;
+  image?: string;
+  url?: string;
+}
+
 interface MapContextType {
   stores: Store[];
   focusStore: (store: Store) => void;
@@ -12,40 +20,45 @@ interface MapContextType {
   setIsMapInitialized: React.Dispatch<React.SetStateAction<boolean>>;
   mapInstance: LeafletMap | null;
   setMapInstance: (map: LeafletMap | null) => void;
+  setStores: React.Dispatch<React.SetStateAction<any[]>>;
+  // selectedStore: Store | null;
+  // setSelectedStore: React.Dispatch<React.SetStateAction<Store | null>>;
+  selectedStore: any;
+  setSelectedStore: (store: any) => void;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  cache: Map<string, any>;
+  setCache: React.Dispatch<React.SetStateAction<Map<string, any>>>;
+  cacheOn: boolean;
+  setCacheOn: React.Dispatch<React.SetStateAction<boolean>>;
+  storeWeb: Map<string, any>;
+  setStoreWeb: React.Dispatch<React.SetStateAction<Map<string, any>>>;
+  ogpData: OGPData | null;
+  setOgpData: React.Dispatch<React.SetStateAction<OGPData | null>>;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
 export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [stores] = useState<Store[]>([
-    {
-      id: 1,
-      name: "レトロ喫茶 モカ",
-      latitude: 35.6938,
-      longitude: 139.7034,
-      address: "東京都千代田区",
-    },
-    {
-      id: 2,
-      name: "地中海バル オリーブ",
-      latitude: 35.6828,
-      longitude: 139.7670,
-      address: "東京都千代田区丸の内",
-    },
-  ]);
+  const [stores, setStores] = useState<Store[]>([]);
 
   // 🔧 修正: useRef<HTMLDivElement>(null) → useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<HTMLDivElement | null>(null);
-
   const mapInstanceRef = useRef<LeafletMap | null>(null);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
-
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [cache, setCache] = useState<Map<string, any>>(new Map());
+  const [cacheOn, setCacheOn] = useState<boolean>(false);
+  const [storeWeb, setStoreWeb] = useState<Map<string, any>>(new Map);
+  const [ogpData, setOgpData] = useState<OGPData | null>(null);
   const focusStore = (store: Store) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([store.latitude, store.longitude], 14);
     }
   };
+
 
   return (
     <MapContext.Provider
@@ -58,6 +71,19 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setIsMapInitialized,
         mapInstance,
         setMapInstance,
+        setStores,
+        selectedStore,
+        setSelectedStore,
+        loading,
+        setLoading,
+        cache,
+        setCache,
+        cacheOn,
+        setCacheOn,
+        storeWeb,
+        setStoreWeb,
+        ogpData,
+        setOgpData,
       }}
     >
       {children}

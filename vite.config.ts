@@ -9,5 +9,8 @@ export default defineConfig({
   // 以下の server オプションを追加または修正します
   server: {
     port: 3000, // 開発サーバーのポートを 3000 に固定
-  }
+  },
+   build: {
+    sourcemap: false, // ソースマップを生成しない
+  },
 })

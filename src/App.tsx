@@ -1,31 +1,40 @@
-import React, { useState } from 'react';
-import "leaflet/dist/leaflet.css";
-import { MapProvider } from './context/StateContext';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { SignUp } from './components/SignUp';
+import { OAuthCallback } from "./components/pages/OAuthCallback";
+import App2 from './App2';
+import Dashboad from './Dashboad';
 import SearchForm from './components/SearchForm';
 import StoreList from './components/StoreList';
 import MapCanvas from './components/MapCanvas';
+import { LoginForm } from './components/LoginForm';
+
 
 const App: React.FC = () => {
-  const [center, setCenter] = useState<[number, number] | null>(null);
-  const searchCenter = center ? center : undefined
-  const handleSearch = (lat: number, lon: number) => {
-    setCenter([lat, lon]);
-  };
 
-  return (
-    
-      <div className="flex flex-col bg-gray-700 h-[100vh]" >
-         <MapProvider>
-            <div className="flex flex-col items-center p-6 text-xl ">
-              <SearchForm onSearch={handleSearch} />
-            </div>
-            <div className="flex flex-row items-center p-6">
-              <StoreList />
-              <MapCanvas center={searchCenter}/>
-            </div>
-          </MapProvider>   
-      </div>  
+   return (
+    // <ErrorBoundary></ErrorBoundary>
+    <div className="App">
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+            <Route path="/" element={<LoginForm />} />
+            <Route path="/SignUp" element={<SignUp />} />
+            <Route path="/oauth-callback" element={<OAuthCallback />} />
+            <Route path="/App2" element={<App2 />} />
+            <Route path="/Dashboad" element={<Dashboad />} />
+            <Route path="/SearchForm" element={<SearchForm onSearch={() => {}}/>} />
+            <Route path="/StoreList" element={<StoreList />} />
+            <Route path="/MapCanvas" element={<MapCanvas />} />
+            </Routes>
+          </BrowserRouter>
+         </AuthProvider>      
+    </div>
   );
-};
+ 
+} 
+ 
+ 
 
-export default App;
+  export default App;
