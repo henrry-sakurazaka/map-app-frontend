@@ -99,21 +99,21 @@ export const LoginForm: React.FC = () => {
             onClick={() => handleProviderLogin("google_oauth2")}
             className="w-full py-2 rounded-md bg-white border flex items-center justify-center hover:bg-gray-100 transition"
           >
-            <img src="/google.svg" alt="Google" className="w-5 h-5 mr-2" />
+            <img src="/web_light_sq_na@3x.png" alt="Google" className="w-5 h-5 mr-2" />
             Googleでログイン
           </button>
-          <button
+          {/* <button
             onClick={() => handleProviderLogin("apple")}
             className="w-full py-2 rounded-md bg-black text-white flex items-center justify-center hover:opacity-80 transition"
           >
             <img src="/apple.svg" alt="Apple" className="w-5 h-5 mr-2 invert" />
             Appleでログイン
-          </button>
+          </button> */}
           <button
             onClick={() => handleProviderLogin("line")}
-            className="w-full py-2 rounded-md bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition"
+            className="w-full py-2 rounded-md bg-white-500 border flex items-center justify-center hover:bg-green-600 transition"
           >
-            <img src="/line.svg" alt="LINE" className="w-5 h-5 mr-2" />
+            <img src="/LINE_Brand_icon.png" alt="LINE" className="w-5 h-5 mr-2" />
             LINEでログイン
           </button>
         </div>

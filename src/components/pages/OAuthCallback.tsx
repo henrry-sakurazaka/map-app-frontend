@@ -67,7 +67,7 @@ export const OAuthCallback: React.FC = () => {
         if (!user) throw new Error("user が返ってこない");
 
         // login の第二引数は token があれば渡す、なければ undefined
-        login(user, token?? "");
+        login(user, token ?? "");
         navigate("/App2", { replace: true });
       } catch (err) {
         console.error("OAuthログイン失敗:", err);
