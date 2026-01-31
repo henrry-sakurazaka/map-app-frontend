@@ -5,6 +5,7 @@ import type { OAuthProvider } from "../types/OAuthProvider";
 export interface LoginResponse {
   user: User;
   token: string;
+  name: string;
 }
 
 // ----------------------
@@ -26,7 +27,7 @@ export async function loginUser(email: string, password: string): Promise<LoginR
     // localStorage.setItem("authUser", JSON.stringify(json.user));
     
     // 🚨 修正3: { user, token } オブジェクト全体を返却
-    return { user: json.user, token: json.token }; 
+    return { user: json.user, token: json.token , name: json.user.name}; 
   } else {
     throw new Error(json.error || json.errors?.join(", ") || "Login failed");
   }
@@ -55,7 +56,7 @@ export async function loginGuest(): Promise<LoginResponse> {
     localStorage.setItem("authToken", json.token);
     localStorage.setItem("authUser", JSON.stringify(json.user));
 
-    return { user: json.user, token: json.token };
+    return { user: json.user, token: json.token , name: json.user.name};
   } else {
     throw new Error(json.error || json.errors?.join(", ") || "Guest login failed");
   }
@@ -87,7 +88,7 @@ export async function registerUser(
       // localStorage.setItem("authUser", JSON.stringify(json.user));
       
       // 🚨 修正3: { user, token } オブジェクト全体を返却 (tokenがない場合は空文字列などを考慮)
-      return { user: json.user, token: json.token || '' }; 
+      return { user: json.user, token: json.token, name: json.user.name || '' }; 
     }
     // トークンがない場合はエラーとして処理するか、サインアップ後のフローによる
     throw new Error("Sign up successful but token missing"); 
@@ -118,7 +119,7 @@ export async function loginOAuth(provider: OAuthProvider, code: string): Promise
     // localStorage.setItem("authUser", JSON.stringify(json.user));
     
     // 🚨 修正3: { user, token } オブジェクト全体を返却
-    return { user: json.user, token: json.token };
+    return { user: json.user, token: json.token, name: json.user.name};
   } else {
     throw new Error(json.error || json.errors?.join(", ") || "OAuth login failed");
   }
