@@ -9,7 +9,7 @@ export function getOAuthUrl(provider: "google_oauth2" | "line" | "apple") {
   }
 
   // 🚨 絶対に /auth にしない
-  return `${apiBase}/api/v1/oauth/${provider}`;
+  return `${apiBase}/auth/${provider}`;
 }
 
 export function getGoogleOAuthUrl() {
