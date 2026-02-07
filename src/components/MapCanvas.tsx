@@ -58,12 +58,18 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
 
     // Overpass API クエリ
     const query = `
-      [out:json];
-      node["shop"](around:1000,${lat},${lon});
+      [out:json][timeout:25];
+      node["amenity"~"restaurant|cafe|fast_food"](around:1000,${lat},${lon});
       out;
     `;
 
-    fetch("https://overpass-api.de/api/interpreter", {
+     const OVERPASS_URLS = [
+      "https://overpass-api.de/api/interpreter",
+      "https://overpass.kumi.systems/api/interpreter",
+      "https://overpass.nchc.org.tw/api/interpreter"
+    ];
+
+    fetch(OVERPASS_URLS[0], {
       method: "POST",
       body: query,
     })

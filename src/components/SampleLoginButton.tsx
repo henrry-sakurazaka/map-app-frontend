@@ -5,9 +5,8 @@ import { loginUser } from "../api/auth";
 const SampleLoginButton: React.FC = () => {
   const handleClick = async () => {
     try {
-      const user = await loginUser("akira@example.com", "password123");
-      console.log("お試しログイン成功:", user);
-      alert(`ようこそ、${user.name}さん`);
+      const response = await loginUser("akira@example.com", "password123");
+      alert(`ようこそ、${response.user.name}さん`);
       // 必要に応じて state に保存したり、リダイレクトする
     } catch (err: any) {
       console.error(err.message);
