@@ -15,10 +15,10 @@ const Dashboad: React.FC = () => {
   const handleSearch = (lat: number, lon: number) => {
     setCenter([lat, lon]);
   };
-  let navigate = useNavigate();
+  const navigateTo = useNavigate();
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigateTo("/");
   }
 
   return (   
