@@ -13,7 +13,7 @@ const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || window.locatio
 // ----------------------
 // ログイン
 // ----------------------
-// 🚨 修正1: 戻り値の型を User から LoginResponse に変更
+// 🚨 修正1: 戻り値の型を User から LoginResponse に変更//////////
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
   const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
     method: "POST",
