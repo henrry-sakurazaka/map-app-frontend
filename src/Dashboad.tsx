@@ -11,6 +11,7 @@ import MapCanvas from './components/MapCanvas';
 const Dashboad: React.FC = () => {
   const [center, setCenter] = useState<[number, number] | null>(null);
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const searchCenter = center ? center : undefined
   const handleSearch = (lat: number, lon: number) => {
     setCenter([lat, lon]);
