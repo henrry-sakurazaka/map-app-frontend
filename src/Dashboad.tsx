@@ -42,17 +42,6 @@ const Dashboad: React.FC = () => {
         </div>
       </MapProvider>
     </div> 
-      // <div className="flex flex-col bg-gray-700 h-[100vh]" >
-      //   <MapProvider>
-      //      <div className="flex flex-col items-center p-6 text-xl ">
-      //         <SearchForm onSearch={handleSearch} />
-      //       </div>
-      //       <div className="flex flex-row items-center p-6">
-      //         <StoreList />
-      //         <MapCanvas center={searchCenter}/>
-      //       </div>      
-      //     </MapProvider>   
-      // </div>  
   );
 };
 
