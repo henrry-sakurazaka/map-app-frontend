@@ -15,7 +15,7 @@ const Dashboad: React.FC = () => {
   const handleSearch = (lat: number, lon: number) => {
     setCenter([lat, lon]);
   };
-  const navigate = useNavigate();
+  let navigate = useNavigate();
   const handleLogout = () => {
     logout();
     navigate("/");
