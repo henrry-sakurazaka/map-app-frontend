@@ -41,28 +41,48 @@ export async function loginUser(email: string, password: string): Promise<LoginR
 // 🚨 修正1: 戻り値の型を User から LoginResponse に変更
 
 export async function loginGuest(): Promise<LoginResponse> {
-  const token = localStorage.getItem("authToken");
   const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
     method: "POST",
     headers: { 
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 
   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } = await res.json();
 
   if (res.ok && json.user && json.token) {
-
-    // ✔ トークン保存必須
     localStorage.setItem("authToken", json.token);
     localStorage.setItem("authUser", JSON.stringify(json.user));
 
-    return { user: json.user, token: json.token , name: json.user.name};
+    return { user: json.user, token: json.token, name: json.user.name };
   } else {
     throw new Error(json.error || json.errors?.join(", ") || "Guest login failed");
   }
 }
+
+// export async function loginGuest(): Promise<LoginResponse> {
+//   const token = localStorage.getItem("authToken");
+//   const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
+//     method: "POST",
+//     headers: { 
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+
+//   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } = await res.json();
+
+//   if (res.ok && json.user && json.token) {
+
+//     // ✔ トークン保存必須
+//     localStorage.setItem("authToken", json.token);
+//     localStorage.setItem("authUser", JSON.stringify(json.user));
+
+//     return { user: json.user, token: json.token , name: json.user.name};
+//   } else {
+//     throw new Error(json.error || json.errors?.join(", ") || "Guest login failed");
+//   }
+// }
 
 // ----------------------
 // サインアップ
