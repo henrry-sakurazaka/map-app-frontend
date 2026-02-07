@@ -18,7 +18,7 @@ const Dashboad: React.FC = () => {
   const navigate = useNavigate();
   const handleLogout = () => {
     logout();
-    navigate("/")
+    navigate("/");
   }
 
   return (   

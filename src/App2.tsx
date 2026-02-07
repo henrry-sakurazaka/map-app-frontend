@@ -10,7 +10,7 @@ const App2: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [authValid, setAuthValid] = useState(false);
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost: 3001";;
-  // ① localStorage から復元//////////
+  // ① localStorage から復元///////////////
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     const storedUser = localStorage.getItem("authUser");
