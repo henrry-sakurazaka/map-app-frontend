@@ -8,12 +8,14 @@ export interface LoginResponse {
   name: string;
 }
 
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string) || window.location.origin;
+
 // ----------------------
 // ログイン
 // ----------------------
 // 🚨 修正1: 戻り値の型を User から LoginResponse に変更
 export async function loginUser(email: string, password: string): Promise<LoginResponse> {
-  const res = await fetch("http://localhost:3001/api/v1/auth/login", {
+  const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -40,7 +42,7 @@ export async function loginUser(email: string, password: string): Promise<LoginR
 
 export async function loginGuest(): Promise<LoginResponse> {
   const token = localStorage.getItem("authToken");
-  const res = await fetch("http://localhost:3001/api/v1/auth/guest", {
+  const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
     method: "POST",
     headers: { 
       "Content-Type": "application/json",
@@ -71,7 +73,7 @@ export async function registerUser(
   email: string,
   password: string
 ): Promise<LoginResponse> { // Promise<LoginResponse> に変更
-  const res = await fetch("http://localhost:3001/api/v1/auth/register", {
+  const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -105,7 +107,7 @@ export async function loginOAuth(provider: OAuthProvider, code: string): Promise
   // 注意: この関数は旧式のフロー（codeを使ってフロントからAPIを叩く）であるため、
   // 以前議論した新しいフロー（Railsがリダイレクトでトークンを渡す）に移行することが強く推奨されます。
   
-  const res = await fetch(`https://dev-auth.offsetcodecraft.site/api/v1/auth/${provider}/callback`, {
+  const res = await fetch(`${API_BASE}/api/v1/auth/${provider}/callback`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code }),
