@@ -71,7 +71,7 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200 px-6">
       {/* サインアップ・お試しログインナビ */}
       <div className="flex flex-col items-center justify-center mb-6">
         <button
@@ -90,7 +90,7 @@ export const LoginForm: React.FC = () => {
       </div>
 
       {/* ログインフォーム */}
-      <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md">
+      <div className="bg-gray-300 rounded-2xl shadow-md p-8 w-full max-w-md">
         <h1 className="text-2xl font-semibold text-center mb-6">ログイン</h1>
 
         {/* --- OAuth プロバイダボタン --- */}
@@ -111,7 +111,7 @@ export const LoginForm: React.FC = () => {
           </button> */}
           <button
             onClick={() => handleProviderLogin("line")}
-            className="w-full py-2 rounded-md bg-white-500 border flex items-center justify-center hover:bg-green-600 transition"
+            className="w-full py-2 rounded-md bg-white border flex items-center justify-center hover:bg-green-600 transition"
           >
             <img src="/LINE_Brand_icon.png" alt="LINE" className="w-5 h-5 mr-2" />
             LINEでログイン
