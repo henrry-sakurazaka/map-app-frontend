@@ -97,7 +97,7 @@ export const LoginForm: React.FC = () => {
         <div className="flex flex-col gap-3 mb-6">
           <button
             onClick={() => handleProviderLogin("google_oauth2")}
-            className="w-full py-2 rounded-md bg-white border flex items-center justify-center hover:bg-gray-100 transition"
+            className="w-full py-2 rounded-md bg-white border flex items-center justify-center hover:bg-blue-500 transition"
           >
             <img src="/web_light_sq_na@3x.png" alt="Google" className="w-5 h-5 mr-2" />
             Googleでログイン

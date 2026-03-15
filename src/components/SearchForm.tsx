@@ -217,28 +217,30 @@ const cacheDisplay = () => {
 
   return (
     <div className="relative mt-6 mb-8">
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 z-[100]">
-        <input
+      <form onSubmit={handleSubmit}
+            className="flex flex-col sm:flex-row gap-3 w-full max-w-[430px] lg:max-w-[800px] z-[100]"
+          >
+       <input
           type="text"
           placeholder="地域名を入力（例: 東京都千代田区丸の内）"
           value={input}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           onChange={(e) => setInput(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 w-[480px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full border border-gray-300 sm:flex-1 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           type="submit"
           disabled={loading}
           className={`${
             loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
-          } text-white px-4 py-2 rounded-lg transition`}
+          } text-white w-full sm:w-auto px-4 py-2 rounded-lg transition`}
           onClick={() => cacheDisplay()}
         >
           {loading ? "検索中…" : "検索"}
         </button>
          {!input && isFocused && history.length > 0 && (
-            <ul className="absolute bg-white border w-[480px] mt-80 rounded shadow z-[1500] ">
+            <ul className="absolute bg-white border w-full mt-2 rounded shadow z-[1500] ">
                 {history.map((q, idx) => (
                 <li
                     key={idx}
