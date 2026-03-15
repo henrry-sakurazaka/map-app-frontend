@@ -128,12 +128,12 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
 
 
   return (
-    <div className="lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
+    <div className="w-full lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
       <div id="share-target">
         <div
           ref={mapRef}
           id="map"
-          className="leaflet-container bg-gray-100"
+          className="leaflet-container bg-gray-100" 
           style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
         ></div>
       </div>    
