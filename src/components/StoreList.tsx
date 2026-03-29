@@ -153,7 +153,7 @@ const StoreList: React.FC = () => {
 
  
   return (
-    <div className="lg:w-1/3 bg-gray-100 p-4 rounded-xl shadow-lg h-[60vh] lg:h-[70vh] overflow-y-auto">
+    <div className="lg:w-1/3 md:w-[650px] bg-gray-100 p-4 rounded-xl shadow-lg h-[60vh] lg:h-[70vh] overflow-y-auto">
           {selectedStore ? (
             <div>
               <h2 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">
