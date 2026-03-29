@@ -240,7 +240,7 @@ const cacheDisplay = () => {
           {loading ? "検索中…" : "検索"}
         </button>
          {!input && isFocused && history.length > 0 && (
-            <ul className="absolute bg-white border w-full mt-2 rounded shadow z-[1500] ">
+            <ul className="absolute bg-white border w-full mt-16 rounded shadow z-[1500] ">
                 {history.map((q, idx) => (
                 <li
                     key={idx}
