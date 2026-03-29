@@ -34,7 +34,7 @@ const Dashboad: React.FC = () => {
     <MapProvider>
 
       {/* スマホ幅制御はここだけ */}
-      <div className="w-full mx-auto mt-4 lg:px-6 max-w-[430px] lg:max-w-[1200px]">
+      <div className="w-full mx-auto mt-4 lg:px-6 max-w-[430px] md:max-w-[700px] lg:max-w-[1200px]">
 
         <div className="flex flex-col items-stretch p-6 gap-6 text-xl w-full">
           <SearchForm onSearch={handleSearch} />
