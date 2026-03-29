@@ -218,7 +218,7 @@ const cacheDisplay = () => {
   return (
     <div className="relative mt-6 mb-8">
       <form onSubmit={handleSubmit}
-            className="flex flex-col sm:flex-row gap-3 w-full max-w-[430px] lg:max-w-[800px] z-[100]"
+            className="flex flex-col sm:flex-row gap-3 w-full max-w-[430px] md:max-w-[700px] lg:max-w-[800px] z-[100]"
           >
        <input
           type="text"
