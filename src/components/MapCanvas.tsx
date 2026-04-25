@@ -1,13 +1,16 @@
-import React, { useEffect, useRef } from "react";
-import L from "leaflet";
-import type { LatLngExpression } from "leaflet";
-import { useMapStore } from "../context/StateContext";
-import "leaflet/dist/leaflet.css";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import type { LatLngExpression } from 'leaflet';
+import { useMapStore } from '../context/StateContext';
+import 'leaflet/dist/leaflet.css';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+// delete (L.Icon.Default.prototype as any)._getIconUrl;
+const proto = L.Icon.Default.prototype as unknown as Record<string, unknown>;
+
+delete proto._getIconUrl;
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -15,29 +18,34 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-
 interface MapCanvasProps {
   center?: LatLngExpression;
 }
 
 const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
-  const { mapRef, setMapInstance, mapInstanceRef,
-     setIsMapInitialized, selectedStore,
-     } = useMapStore();
+  const {
+    mapRef,
+    setMapInstance,
+    mapInstanceRef,
+    setIsMapInitialized,
+    selectedStore,
+  } = useMapStore();
   const markersRef = useRef<L.LayerGroup | null>(null);
 
   // --- ✅ 初期化 ---
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
-    
-    window.addEventListener("resize", () => mapInstanceRef.current?.invalidateSize());
+
+    window.addEventListener('resize', () =>
+      mapInstanceRef.current?.invalidateSize(),
+    );
 
     const timer = setTimeout(() => {
       if (!mapRef.current) return;
 
       const map = L.map(mapRef.current).setView([36.2048, 138.2529], 6);
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
@@ -64,7 +72,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
       if (layer instanceof L.Marker) map.removeLayer(layer);
     });
 
-    L.marker(center).addTo(map).bindPopup("中心点");
+    L.marker(center).addTo(map).bindPopup('中心点');
 
     const [lat, lon] = center as [number, number];
 
@@ -75,29 +83,29 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
       out;
     `;
 
-     const OVERPASS_URLS = [
-      "https://overpass-api.de/api/interpreter",
-      "https://overpass.kumi.systems/api/interpreter",
-      "https://overpass.nchc.org.tw/api/interpreter"
+    const OVERPASS_URLS = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+      'https://overpass.nchc.org.tw/api/interpreter',
     ];
 
     fetch(OVERPASS_URLS[0], {
-      method: "POST",
+      method: 'POST',
       body: query,
     })
       .then((res) => res.json())
       .then((data) => {
         data.elements.forEach((el: any) => {
-          if (el.type === "node") {
+          if (el.type === 'node') {
             const { lat, lon, tags } = el;
-            const name = tags.name || tags.shop || "店舗";
+            const name = tags.name || tags.shop || '店舗';
             L.marker([lat, lon])
               .addTo(map)
-              .bindPopup(`<b>${name}</b><br>${tags.shop || ""}`);
+              .bindPopup(`<b>${name}</b><br>${tags.shop || ''}`);
           }
         });
       })
-      .catch((err) => console.error("Overpass API Error:", err));
+      .catch((err) => console.error('Overpass API Error:', err));
 
     map.setView(center, 16);
   }, [center]);
@@ -117,15 +125,16 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
     if (selectedStore) {
       const { latitude, longitude, name } = selectedStore;
       if (latitude !== undefined && longitude !== undefined) {
-        console.log("Adding marker at:", latitude, longitude);
-        const marker = L.marker([latitude, longitude]).bindPopup(`<b>${name}</b>`);
+        console.log('Adding marker at:', latitude, longitude);
+        const marker = L.marker([latitude, longitude]).bindPopup(
+          `<b>${name}</b>`,
+        );
         marker.addTo(markers);
         marker.openPopup();
         map.setView([latitude, longitude], 17);
       }
     }
-  }, [selectedStore]); 
-
+  }, [selectedStore]);
 
   return (
     <div className="w-full lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
@@ -133,10 +142,10 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
         <div
           ref={mapRef}
           id="map"
-          className="leaflet-container bg-gray-100" 
-          style={{ height: "70vh", width: "100%", borderRadius: "12px" }}
+          className="leaflet-container bg-gray-100"
+          style={{ height: '70vh', width: '100%', borderRadius: '12px' }}
         ></div>
-      </div>    
+      </div>
     </div>
   );
 };

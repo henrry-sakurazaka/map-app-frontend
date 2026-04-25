@@ -1,27 +1,32 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 // 🚨 修正1: loginGuest をインポートに追加
-import { loginUser, loginGuest } from "../api/auth"; 
-import { useNavigate } from "react-router-dom"; 
-import { getGoogleOAuthUrl, getLineOAuthUrl, getAppleOAuthUrl } from "../utils/oauth";
-import { useAuth } from "../context/AuthContext";
+import { loginUser, loginGuest } from '../api/auth';
+import { useNavigate } from 'react-router-dom';
+import {
+  getGoogleOAuthUrl,
+  getLineOAuthUrl,
+  getAppleOAuthUrl,
+} from '../utils/oauth';
+import { useAuth } from '../context/AuthContext';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   // useAuth から login 関数を取得
-  const { login } = useAuth(); 
+  const { login } = useAuth();
 
-
-//プロバイダログイン
-  const handleProviderLogin = (provider: "google_oauth2" | "apple" | "line") => {
-    let url = "";
-    if (provider === "google_oauth2") url = getGoogleOAuthUrl();
-    if (provider === "apple") url = getAppleOAuthUrl();
-    if (provider === "line") url = getLineOAuthUrl();
+  //プロバイダログイン
+  const handleProviderLogin = (
+    provider: 'google_oauth2' | 'apple' | 'line',
+  ) => {
+    let url = '';
+    if (provider === 'google_oauth2') url = getGoogleOAuthUrl();
+    if (provider === 'apple') url = getAppleOAuthUrl();
+    if (provider === 'line') url = getLineOAuthUrl();
 
     // Rails OmniAuth に丸投げ
     window.location.href = url;
@@ -35,13 +40,13 @@ export const LoginForm: React.FC = () => {
 
     try {
       const response = await loginUser(email, password);
-      
+
       // 🚨 修正2: 通常ログイン時も Context に認証情報を保存する必要がある
-      login(response.user, response.token); 
-      
+      login(response.user, response.token);
+
       alert(`ようこそ ${response.user.name} さん`);
-      navigate("/App2");
-    } catch (err: any) {
+      navigate('/App2');
+    } catch (err: string | any) {
       setError(err.message);
       alert(`ログインに失敗しました: ${err.message}`);
     } finally {
@@ -54,19 +59,19 @@ export const LoginForm: React.FC = () => {
     try {
       // 🚨 修正3: loginUser ではなく loginGuest を使用
       const response = await loginGuest();
-      
+
       // 2. 認証情報を Context に保存 (これが App2 にトークンを認識させる鍵)
       login(response.user, response.token);
-      
+
       // 3. レスポンスから取得したユーザー名を表示
-      alert(`ようこそ ${response.user.name} さん`); 
-      
+      alert(`ようこそ ${response.user.name} さん`);
+
       // 4. リダイレクト
-      navigate("/App2");
-    } catch (err: any) {
+      navigate('/App2');
+    } catch (err: string | any) {
       setError(err.message);
       // ログイン失敗時は alert でユーザーに通知することが望ましい
-      alert(`お試しログインに失敗しました: ${err.message}`); 
+      alert(`お試しログインに失敗しました: ${err.message}`);
     }
   };
 
@@ -75,7 +80,7 @@ export const LoginForm: React.FC = () => {
       {/* サインアップ・お試しログインナビ */}
       <div className="flex flex-col items-center justify-center mb-6">
         <button
-          onClick={() => navigate("/SignUp")}
+          onClick={() => navigate('/SignUp')}
           className="text-2xl font-semibold text-blue-600 hover:underline"
         >
           サインアップ
@@ -96,10 +101,14 @@ export const LoginForm: React.FC = () => {
         {/* --- OAuth プロバイダボタン --- */}
         <div className="flex flex-col gap-3 mb-6">
           <button
-            onClick={() => handleProviderLogin("google_oauth2")}
+            onClick={() => handleProviderLogin('google_oauth2')}
             className="w-full py-2 rounded-md bg-white border flex items-center justify-center hover:bg-blue-500 transition"
           >
-            <img src="/web_light_sq_na@3x.png" alt="Google" className="w-5 h-5 mr-2" />
+            <img
+              src="/web_light_sq_na@3x.png"
+              alt="Google"
+              className="w-5 h-5 mr-2"
+            />
             Googleでログイン
           </button>
           {/* <button
@@ -110,10 +119,14 @@ export const LoginForm: React.FC = () => {
             Appleでログイン
           </button> */}
           <button
-            onClick={() => handleProviderLogin("line")}
+            onClick={() => handleProviderLogin('line')}
             className="w-full py-2 rounded-md bg-white border flex items-center justify-center hover:bg-green-600 transition"
           >
-            <img src="/LINE_Brand_icon.png" alt="LINE" className="w-5 h-5 mr-2" />
+            <img
+              src="/LINE_Brand_icon.png"
+              alt="LINE"
+              className="w-5 h-5 mr-2"
+            />
             LINEでログイン
           </button>
         </div>
@@ -146,7 +159,7 @@ export const LoginForm: React.FC = () => {
             disabled={loading}
             className="bg-blue-500 text-white rounded-md py-2 hover:bg-blue-600 transition disabled:opacity-60"
           >
-            {loading ? "ログイン中..." : "ログイン"}
+            {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>
 
@@ -155,4 +168,3 @@ export const LoginForm: React.FC = () => {
     </div>
   );
 };
-
