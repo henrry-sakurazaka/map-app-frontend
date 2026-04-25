@@ -1,19 +1,20 @@
 // src/App2.tsx
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
-import Dashboad from "./Dashboad";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Dashboad from './Dashboad';
 
 const App2: React.FC = () => {
   const navigate = useNavigate();
-  const { user, token, login, logout } = useAuth(); 
+  const { user, token, login, logout } = useAuth();
   const [loading, setLoading] = useState(true);
   const [authValid, setAuthValid] = useState(false);
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost: 3001";;
+  const API_BASE =
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost: 3001';
   // ① localStorage から復元///////////////
   useEffect(() => {
-    const storedToken = localStorage.getItem("authToken");
-    const storedUser = localStorage.getItem("authUser");
+    const storedToken = localStorage.getItem('authToken');
+    const storedUser = localStorage.getItem('authUser');
 
     if (storedToken && storedUser) {
       login(JSON.parse(storedUser), storedToken);
@@ -21,33 +22,33 @@ const App2: React.FC = () => {
   }, []);
 
   useEffect(() => {
-     //Contextにuserがいればゲストも含めてチェック不要
+    //Contextにuserがいればゲストも含めてチェック不要
     if (user) {
       setAuthValid(true);
       setLoading(false);
       return;
     }
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
     // ゲストログイン用 API
     const loginGuest = async () => {
       try {
         const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
         });
 
-        if (!res.ok) throw new Error("Guest login failed");
+        if (!res.ok) throw new Error('Guest login failed');
 
         const data = await res.json();
-        login(data.user, data.token);  // context に保存
+        login(data.user, data.token); // context に保存
         setAuthValid(true);
       } catch (error) {
-        console.error("ゲストログインエラー:", error);
+        console.error('ゲストログインエラー:', error);
         logout();
         setAuthValid(false);
-        navigate("/");
+        navigate('/');
       } finally {
         setLoading(false);
       }
@@ -58,10 +59,10 @@ const App2: React.FC = () => {
       const checkCurrentUser = async () => {
         try {
           const res = await fetch(`${API_BASE}/api/v1/auth/current_user`, {
-            method: "GET",
+            method: 'GET',
             headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
             },
           });
 
@@ -70,11 +71,11 @@ const App2: React.FC = () => {
             login(data, token);
             setAuthValid(true);
           } else {
-            console.warn("Current user 無効。ゲストログインに切替");
+            console.warn('Current user 無効。ゲストログインに切替');
             await loginGuest();
           }
         } catch (error) {
-          console.error("認証チェック中にエラー:", error);
+          console.error('認証チェック中にエラー:', error);
           await loginGuest();
         } finally {
           setLoading(false);

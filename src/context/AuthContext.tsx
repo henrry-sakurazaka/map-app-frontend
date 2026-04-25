@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState,  type ReactNode, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+  useEffect,
+} from 'react';
 
 interface User {
   id: number;
@@ -18,9 +24,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem("authToken"));
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem('authToken'),
+  );
 
   // ページリロード時に localStorage から復元
   useEffect(() => {
@@ -30,8 +40,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     //   const savedUser = localStorage.getItem("authUser");
     //   if (savedUser) setUser(JSON.parse(savedUser));
     // }
-    const savedToken = localStorage.getItem("authToken");
-    const savedUser = localStorage.getItem("authUser");
+    const savedToken = localStorage.getItem('authToken');
+    const savedUser = localStorage.getItem('authUser');
 
     if (savedToken) {
       setToken(savedToken);
@@ -44,15 +54,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = (user: User, token: string) => {
     setUser(user);
     setToken(token);
-    localStorage.setItem("authToken", token);
-    localStorage.setItem("authUser", JSON.stringify(user));
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('authUser', JSON.stringify(user));
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("authUser");
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
   };
 
   return (
@@ -64,6 +74,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 };

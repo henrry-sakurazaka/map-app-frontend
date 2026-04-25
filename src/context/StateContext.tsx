@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useRef } from "react";
-import type { ReactNode } from "react";
-import type { Store } from "../types/store";
-import { Map as LeafletMap } from "leaflet";
+import React, { createContext, useContext, useState, useRef } from 'react';
+import type { ReactNode } from 'react';
+import type { Store } from '../types/store';
+import { Map as LeafletMap } from 'leaflet';
 
 // ✅ OGPデータ型を定義
 export interface OGPData {
@@ -39,7 +39,9 @@ interface MapContextType {
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
 
-export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const MapProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [stores, setStores] = useState<Store[]>([]);
 
   // 🔧 修正: useRef<HTMLDivElement>(null) → useRef<HTMLDivElement | null>(null)
@@ -51,14 +53,13 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [loading, setLoading] = useState(false);
   const [cache, setCache] = useState<Map<string, any>>(new Map());
   const [cacheOn, setCacheOn] = useState<boolean>(false);
-  const [storeWeb, setStoreWeb] = useState<Map<string, any>>(new Map);
+  const [storeWeb, setStoreWeb] = useState<Map<string, any>>(new Map());
   const [ogpData, setOgpData] = useState<OGPData | null>(null);
   const focusStore = (store: Store) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([store.latitude, store.longitude], 14);
     }
   };
-
 
   return (
     <MapContext.Provider
@@ -93,6 +94,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
 export const useMapStore = (): MapContextType => {
   const context = useContext(MapContext);
-  if (!context) throw new Error("useMapStore must be used within a MapProvider");
+  if (!context)
+    throw new Error('useMapStore must be used within a MapProvider');
   return context;
 };

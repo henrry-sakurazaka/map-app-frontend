@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { registerUser } from "../api/auth"; // サーバーの登録APIに合わせて作成
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { registerUser } from '../api/auth'; // サーバーの登録APIに合わせて作成
+import { useNavigate } from 'react-router-dom';
 
 export const SignUp: React.FC = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ export const SignUp: React.FC = () => {
     try {
       const user = await registerUser(name, email, password);
       alert(`登録成功！ようこそ ${user.name} さん`);
-      navigate("/App2");
+      navigate('/App2');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -29,7 +29,9 @@ export const SignUp: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-6">
       <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-center mb-6">サインアップ</h1>
+        <h1 className="text-2xl font-semibold text-center mb-6">
+          サインアップ
+        </h1>
 
         <form onSubmit={handleSignup} className="flex flex-col gap-4">
           <input
@@ -62,13 +64,13 @@ export const SignUp: React.FC = () => {
             disabled={loading}
             className="bg-green-500 text-white rounded-md py-2 hover:bg-green-600 transition disabled:opacity-60"
           >
-            {loading ? "登録中..." : "登録する"}
+            {loading ? '登録中...' : '登録する'}
           </button>
         </form>
 
         {error && <p className="text-red-500 text-center mt-3">{error}</p>}
         <p
-          onClick={() => navigate("/login")}
+          onClick={() => navigate('/login')}
           className="text-blue-500 text-center mt-4 hover:underline cursor-pointer"
         >
           すでにアカウントをお持ちの方はこちら

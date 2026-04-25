@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [developmentX]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 🔥 Prettierチェック追加
+      - name: Run Prettier check
+        run: npx prettier . --check
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start app
+        run: npm run dev &
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000
+
+      - name: Run Playwright tests
+        run: npx playwright test

@@ -8,23 +8,25 @@ export type GeocodeResult = {
   displayName: string;
 };
 
-export async function fetchCoordinates(rawQuery: string): Promise<GeocodeResult | null> {
+export async function fetchCoordinates(
+  rawQuery: string,
+): Promise<GeocodeResult | null> {
   const query = normalizeJapaneseQuery(rawQuery);
   if (!query) return null;
 
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("q", query);
-  url.searchParams.set("format", "jsonv2"); // jsonv2 のほうが扱いやすい
-  url.searchParams.set("addressdetails", "1");
-  url.searchParams.set("limit", "1");
-  url.searchParams.set("countrycodes", "jp"); // 日本に限定
+  const url = new URL('https://nominatim.openstreetmap.org/search');
+  url.searchParams.set('q', query);
+  url.searchParams.set('format', 'jsonv2'); // jsonv2 のほうが扱いやすい
+  url.searchParams.set('addressdetails', '1');
+  url.searchParams.set('limit', '1');
+  url.searchParams.set('countrycodes', 'jp'); // 日本に限定
 
   const res = await fetch(url.toString(), {
     headers: {
-      "Accept": "application/json",
+      Accept: 'application/json',
       // Nominatim 利用時は User-Agent を入れるのがマナー
-      "User-Agent": "map-app/1.0 (your-email@example.com)"
-    }
+      'User-Agent': 'map-app/1.0 (your-email@example.com)',
+    },
   });
 
   if (!res.ok) return null;
@@ -33,7 +35,7 @@ export async function fetchCoordinates(rawQuery: string): Promise<GeocodeResult 
   if (!Array.isArray(data) || data.length === 0) {
     // フォールバック: クエリに国名を追加して再検索（番地のみ入力時に有効）
     if (!/, ?(日本|Japan)$/i.test(query)) {
-      return await fetchCoordinates(query + ", 日本");
+      return await fetchCoordinates(query + ', 日本');
     }
     return null;
   }
@@ -43,15 +45,23 @@ export async function fetchCoordinates(rawQuery: string): Promise<GeocodeResult 
   const lon = parseFloat(item.lon);
 
   // Nominatim の boundingbox は文字列配列: [south, north, west, east]
-  let bbox: GeocodeResult["bbox"] | undefined = undefined;
+  let bbox: GeocodeResult['bbox'] | undefined = undefined;
   if (Array.isArray(item.boundingbox) && item.boundingbox.length >= 4) {
     // parseFloat して [[south, west], [north, east]] の形にする
     const south = parseFloat(item.boundingbox[0]);
     const north = parseFloat(item.boundingbox[1]);
-    const west  = parseFloat(item.boundingbox[2]);
-    const east  = parseFloat(item.boundingbox[3]);
-    if (!Number.isNaN(south) && !Number.isNaN(north) && !Number.isNaN(west) && !Number.isNaN(east)) {
-      bbox = [[south, west], [north, east]];
+    const west = parseFloat(item.boundingbox[2]);
+    const east = parseFloat(item.boundingbox[3]);
+    if (
+      !Number.isNaN(south) &&
+      !Number.isNaN(north) &&
+      !Number.isNaN(west) &&
+      !Number.isNaN(east)
+    ) {
+      bbox = [
+        [south, west],
+        [north, east],
+      ];
     }
   }
 
@@ -59,7 +69,7 @@ export async function fetchCoordinates(rawQuery: string): Promise<GeocodeResult 
     lat,
     lon,
     bbox,
-    displayName: item.display_name ?? ""
+    displayName: item.display_name ?? '',
   };
 }
 
@@ -69,10 +79,12 @@ export async function fetchCoordinates(rawQuery: string): Promise<GeocodeResult 
  */
 function normalizeJapaneseQuery(q: string): string {
   const t = q.trim();
-  if (!t) return "";
+  if (!t) return '';
 
   // 全角数字→半角
-  const half = t.replace(/[０-９]/g, (d) => String.fromCharCode(d.charCodeAt(0) - 0xFEE0));
+  const half = t.replace(/[０-９]/g, (d) =>
+    String.fromCharCode(d.charCodeAt(0) - 0xfee0),
+  );
 
   // 番地っぽい (e.g. "2-24-3" や "2丁目") かつ市区町村等が含まれない場合は国名を補完
   const looksLikeBanchi = /(\d+[-丁目]\d+)|\d+\s*-\s*\d+/.test(half);
