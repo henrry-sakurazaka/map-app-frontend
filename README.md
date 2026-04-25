@@ -94,8 +94,8 @@ Reactの地図ライブラリを使用し
 ### CI/CDパイプラインテスト通過の画像です
 
 ## ![テスト通過](./public/CI:CD-img.png)
-## ![テスト通過](./public/successfully-test.png)
 
+## ![テスト通過](./public/successfully-test.png)
 
 ## 🚀 今後の改善
 
