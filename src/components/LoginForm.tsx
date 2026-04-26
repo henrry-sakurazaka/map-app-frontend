@@ -56,6 +56,7 @@ export const LoginForm: React.FC = () => {
 
   // --- お試しログイン ---
   const handleGuestLogin = async () => {
+    setLoading(true);
     try {
       // 🚨 修正3: loginUser ではなく loginGuest を使用
       const response = await loginGuest();
@@ -72,6 +73,8 @@ export const LoginForm: React.FC = () => {
       setError(err.message);
       // ログイン失敗時は alert でユーザーに通知することが望ましい
       alert(`お試しログインに失敗しました: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,7 +93,9 @@ export const LoginForm: React.FC = () => {
           onClick={handleGuestLogin}
           className="text-2xl font-semibold text-blue-600 hover:underline"
         >
-          お試しログイン
+          {loading
+            ? 'ログイン中...バックエンドに接続しています。'
+            : 'お試しログイン'}
         </button>
       </div>
 
