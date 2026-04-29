@@ -94,7 +94,7 @@ export const LoginForm: React.FC = () => {
           className="text-2xl font-semibold text-blue-600 hover:underline"
         >
           {loading
-            ? 'ログイン中...バックエンドに接続しています。'
+            ? 'ログイン中...バックエンドに接続しています。無料でサービスを提供している為、接続に数分かかる場合があります。'
             : 'お試しログイン'}
         </button>
       </div>
