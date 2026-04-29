@@ -64,8 +64,8 @@ export const LoginForm: React.FC = () => {
       // 2. 認証情報を Context に保存 (これが App2 にトークンを認識させる鍵)
       login(response.user, response.token);
 
-      // 3. レスポンスから取得したユーザー名を表示
-      alert(`ようこそ ${response.user.name} さん`);
+      // // 3. レスポンスから取得したユーザー名を表示
+      // alert(`ようこそ ${response.user.name} さん`);
 
       // 4. リダイレクト
       navigate('/App2');
