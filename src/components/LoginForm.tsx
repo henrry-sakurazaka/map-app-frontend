@@ -44,7 +44,7 @@ export const LoginForm: React.FC = () => {
       // 🚨 修正2: 通常ログイン時も Context に認証情報を保存する必要がある
       login(response.user, response.token);
 
-      alert(`ようこそ ${response.user.name} さん`);
+      // alert(`ようこそ ${response.user.name} さん`);
       navigate('/App2');
     } catch (err: string | any) {
       setError(err.message);
