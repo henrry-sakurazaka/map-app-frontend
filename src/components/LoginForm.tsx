@@ -44,7 +44,7 @@ export const LoginForm: React.FC = () => {
       // 🚨 修正2: 通常ログイン時も Context に認証情報を保存する必要がある
       login(response.user, response.token);
 
-      alert(`ようこそ ${response.user.name} さん`);
+      // alert(`ようこそ ${response.user.name} さん`);
       navigate('/App2');
     } catch (err: string | any) {
       setError(err.message);
@@ -64,8 +64,8 @@ export const LoginForm: React.FC = () => {
       // 2. 認証情報を Context に保存 (これが App2 にトークンを認識させる鍵)
       login(response.user, response.token);
 
-      // 3. レスポンスから取得したユーザー名を表示
-      alert(`ようこそ ${response.user.name} さん`);
+      // // 3. レスポンスから取得したユーザー名を表示
+      // alert(`ようこそ ${response.user.name} さん`);
 
       // 4. リダイレクト
       navigate('/App2');
