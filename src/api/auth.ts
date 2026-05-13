@@ -46,12 +46,12 @@ export async function loginUser(
 // 🚨 修正1: 戻り値の型を User から LoginResponse に変更
 
 export async function loginGuest(): Promise<LoginResponse> {
-  const token = localStorage.getItem('authToken');
+  // const token = localStorage.getItem('authToken');
   const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      // Authorization: `Bearer ${token}`,
     },
   });
 
