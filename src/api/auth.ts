@@ -46,30 +46,82 @@ export async function loginUser(
 // 🚨 修正1: 戻り値の型を User から LoginResponse に変更
 
 export async function loginGuest(): Promise<LoginResponse> {
-  // const token = localStorage.getItem('authToken');
-  const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // Authorization: `Bearer ${token}`,
-    },
-  });
+  const start = Date.now();
 
-  const json: Partial<LoginResponse> & { error?: string; errors?: string[] } =
-    await res.json();
+  // 最大5分待つ
+  const MAX_WAIT = 5 * 60 * 1000;
 
-  if (res.ok && json.user && json.token) {
-    // ✔ トークン保存必須
-    localStorage.setItem('authToken', json.token);
-    localStorage.setItem('authUser', JSON.stringify(json.user));
+  while (Date.now() - start < MAX_WAIT) {
+    try {
+      const token = localStorage.getItem('authToken');
 
-    return { user: json.user, token: json.token, name: json.user.name };
-  } else {
-    throw new Error(
-      json.error || json.errors?.join(', ') || 'Guest login failed',
-    );
+      const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // backend 起動待ち中のエラーは無視
+      if (!res.ok) {
+        console.log(`Server waking up... status=${res.status}`);
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        continue;
+      }
+
+      const json: Partial<LoginResponse> & {
+        error?: string;
+        errors?: string[];
+      } = await res.json();
+
+      if (json.user && json.token) {
+        localStorage.setItem('authToken', json.token);
+        localStorage.setItem('authUser', JSON.stringify(json.user));
+
+        return {
+          user: json.user,
+          token: json.token,
+          name: json.user.name,
+        };
+      }
+    } catch (err) {
+      console.log('Server still sleeping...', err);
+
+      // 5秒待って再試行
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
   }
+
+  throw new Error('サーバーの起動に時間がかかっています');
 }
+
+// export async function loginGuest(): Promise<LoginResponse> {
+//   // const token = localStorage.getItem('authToken');
+//   const res = await fetch(`${API_BASE}/api/v1/auth/guest`, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       // Authorization: `Bearer ${token}`,
+//     },
+//   });
+
+//   const json: Partial<LoginResponse> & { error?: string; errors?: string[] } =
+//     await res.json();
+
+//   if (res.ok && json.user && json.token) {
+//     // ✔ トークン保存必須
+//     localStorage.setItem('authToken', json.token);
+//     localStorage.setItem('authUser', JSON.stringify(json.user));
+
+//     return { user: json.user, token: json.token, name: json.user.name };
+//   } else {
+//     throw new Error(
+//       json.error || json.errors?.join(', ') || 'Guest login failed',
+//     );
+//   }
+// }
 
 // ----------------------
 // サインアップ
