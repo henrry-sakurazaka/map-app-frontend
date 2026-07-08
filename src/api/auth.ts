@@ -32,7 +32,7 @@ export async function loginUser(
     // 🚨 修正2: localStorage への保存を削除
     // localStorage.setItem("authToken", json.token);
     // localStorage.setItem("authUser", JSON.stringify(json.user));
-
+    /////////////////////////////////////
     // 🚨 修正3: { user, token } オブジェクト全体を返却
     return { user: json.user, token: json.token, name: json.user.name };
   } else {
