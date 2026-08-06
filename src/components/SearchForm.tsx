@@ -141,9 +141,6 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     try {
       const res = await fetch('https://overpass-api.de/api/interpreter', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain',
-        },
         body: query,
       });
       if (!res.ok) throw new Error('Overpass API request failed');
