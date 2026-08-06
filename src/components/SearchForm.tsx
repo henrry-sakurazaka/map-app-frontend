@@ -139,7 +139,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       out center;
     `;
     try {
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
+      // const res = await fetch('https://overpass-api.de/api/interpreter', {
+      const res = await fetch('https://overpass.kumi.systems/api/interpreter', {
         method: 'POST',
         body: query,
       });
