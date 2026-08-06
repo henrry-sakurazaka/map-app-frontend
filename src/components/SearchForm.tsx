@@ -105,7 +105,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       return '住所不明';
     }
 
-    const url = `${baseUrl}/api/reverse-geocode?lat=${lat}&lon=${lon}`;
+    const url = `${baseUrl}/api/v1/reverse-geocode?lat=${lat}&lon=${lon}`;
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Reverse geocode failed (${res.status})`);
