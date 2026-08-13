@@ -99,60 +99,41 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   // これにより /api/v1/reverse-geocode の404を発生させない。
   // =========================================================
   const fetchOverpassPOIs = async (lat: number, lon: number, radius = 500) => {
-    const query = `
-      [out:json][timeout:15];
-      (
-        node["shop"](around:${radius},${lat},${lon});
-        node["amenity"~"cafe|restaurant|bar|fast_food"](around:${radius},${lat},${lon});
-      );
-      out center;
-    `;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-    const OVERPASS_URLS = [
-      'https://overpass.kumi.systems/api/interpreter',
-      'https://overpass-api.de/api/interpreter',
-      'https://overpass.nchc.org.tw/api/interpreter',
-    ];
-
-    for (const url of OVERPASS_URLS) {
-      try {
-        console.log('🛰️ Overpass API:', url);
-
-        const res = await fetch(url, {
-          method: 'POST',
-          body: query,
-        });
-
-        if (!res.ok) {
-          console.warn(`⚠️ Overpass ${res.status}:`, url);
-          continue;
-        }
-
-        const json = await res.json();
-
-        const elements =
-          json.elements
-            ?.map((el: any) => ({
-              ...el,
-              lat: el.lat ?? el.center?.lat,
-              lon: el.lon ?? el.center?.lon,
-              tags: el.tags ?? {},
-            }))
-            .filter(
-              (el: any) => el.lat !== undefined && el.lon !== undefined,
-            ) ?? [];
-
-        console.log('🟢 Overpass POIs:', elements.length);
-
-        return elements;
-      } catch {
-        console.warn('⚠️ Overpass接続失敗:', url);
-      }
+    if (!baseUrl) {
+      console.error('VITE_API_BASE_URL が設定されていません');
+      return [];
     }
 
-    console.warn('⚠️ すべてのOverpass APIに接続できませんでした');
+    const url =
+      `${baseUrl}/api/v1/overpass` + `?lat=${lat}&lon=${lon}&radius=${radius}`;
 
-    return [];
+    try {
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        console.warn(`Overpass proxy failed: ${res.status}`);
+        return [];
+      }
+
+      const json = await res.json();
+
+      return (
+        json.elements
+          ?.map((el: any) => ({
+            ...el,
+            lat: el.lat || el.center?.lat,
+            lon: el.lon || el.center?.lon,
+            tags: el.tags || {},
+          }))
+          .filter((el: any) => el.lat !== undefined && el.lon !== undefined) ||
+        []
+      );
+    } catch (err) {
+      console.warn('Overpass API取得失敗:', err);
+      return [];
+    }
   };
 
   // =========================================================
