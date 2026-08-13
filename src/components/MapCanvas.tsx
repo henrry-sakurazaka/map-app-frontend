@@ -28,7 +28,9 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
     setMapInstance,
     mapInstanceRef,
     setIsMapInitialized,
+    isMapInitialized,
     selectedStore,
+    stores,
   } = useMapStore();
   const markersRef = useRef<L.LayerGroup | null>(null);
 
@@ -74,46 +76,13 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
 
     L.marker(center).addTo(map).bindPopup('中心点');
 
-    const [lat, lon] = center as [number, number];
-
-    // Overpass API クエリ
-    const query = `
-      [out:json][timeout:25];
-      node["amenity"~"restaurant|cafe|fast_food"](around:1000,${lat},${lon});
-      out;
-    `;
-
-    const OVERPASS_URLS = [
-      'https://overpass-api.de/api/interpreter',
-      'https://overpass.kumi.systems/api/interpreter',
-      'https://overpass.nchc.org.tw/api/interpreter',
-    ];
-
-    fetch(OVERPASS_URLS[0], {
-      method: 'POST',
-      body: query,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        data.elements.forEach((el: any) => {
-          if (el.type === 'node') {
-            const { lat, lon, tags } = el;
-            const name = tags.name || tags.shop || '店舗';
-            L.marker([lat, lon])
-              .addTo(map)
-              .bindPopup(`<b>${name}</b><br>${tags.shop || ''}`);
-          }
-        });
-      })
-      .catch((err) => console.error('Overpass API Error:', err));
-
     map.setView(center, 16);
   }, [center]);
 
   // --- ✅ selectedStore（店舗選択）が更新されたとき ---
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map) return;
+    if (!map || !isMapInitialized) return;
 
     if (!markersRef.current) {
       markersRef.current = L.layerGroup().addTo(map);
@@ -122,18 +91,42 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
     const markers = markersRef.current;
     markers.clearLayers();
 
-    if (selectedStore) {
-      const { latitude, longitude, name } = selectedStore;
-      if (latitude !== undefined && longitude !== undefined) {
-        console.log('Adding marker at:', latitude, longitude);
-        const marker = L.marker([latitude, longitude]).bindPopup(
-          `<b>${name}</b>`,
+    stores.forEach((store) => {
+      if (store.latitude !== undefined && store.longitude !== undefined) {
+        console.log(
+          '📍 Adding store marker:',
+          store.name,
+          store.latitude,
+          store.longitude,
         );
-        marker.addTo(markers);
-        marker.openPopup();
-        map.setView([latitude, longitude], 17);
+
+        const marker = L.marker([store.latitude, store.longitude]).bindPopup(
+          `<b>${store.name}</b>`,
+        );
+
+        markers.addLayer(marker);
       }
+    });
+  }, [stores, isMapInitialized]);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !selectedStore) return;
+
+    const { latitude, longitude, name } = selectedStore;
+
+    if (latitude === undefined || longitude === undefined) {
+      return;
     }
+
+    console.log('📍 Selected store:', name, latitude, longitude);
+
+    map.setView([latitude, longitude], 17);
+
+    L.popup()
+      .setLatLng([latitude, longitude])
+      .setContent(`<b>${name}</b>`)
+      .openOn(map);
   }, [selectedStore]);
 
   return (
