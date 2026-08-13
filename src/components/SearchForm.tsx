@@ -33,9 +33,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   // =========================================================
   // 🗾 国土地理院API
   // =========================================================
-  const searchGSI = async (
-    query: string,
-  ): Promise<LocationResult[]> => {
+  const searchGSI = async (query: string): Promise<LocationResult[]> => {
     try {
       const url =
         `https://msearch.gsi.go.jp/address-search/AddressSearch?q=` +
@@ -62,9 +60,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   // =========================================================
   // 🌍 Nominatim
   // =========================================================
-  const searchNominatim = async (
-    query: string,
-  ): Promise<LocationResult[]> => {
+  const searchNominatim = async (query: string): Promise<LocationResult[]> => {
     try {
       const url =
         `https://nominatim.openstreetmap.org/search?format=json` +
@@ -102,11 +98,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   // Reverse Geocodeは使用しない。
   // これにより /api/v1/reverse-geocode の404を発生させない。
   // =========================================================
-  const fetchOverpassPOIs = async (
-    lat: number,
-    lon: number,
-    radius = 500,
-  ) => {
+  const fetchOverpassPOIs = async (lat: number, lon: number, radius = 500) => {
     const query = `
       [out:json][timeout:15];
       (
@@ -132,10 +124,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
         });
 
         if (!res.ok) {
-          console.warn(
-            `⚠️ Overpass ${res.status}:`,
-            url,
-          );
+          console.warn(`⚠️ Overpass ${res.status}:`, url);
           continue;
         }
 
@@ -150,28 +139,18 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
               tags: el.tags ?? {},
             }))
             .filter(
-              (el: any) =>
-                el.lat !== undefined &&
-                el.lon !== undefined,
+              (el: any) => el.lat !== undefined && el.lon !== undefined,
             ) ?? [];
 
-        console.log(
-          '🟢 Overpass POIs:',
-          elements.length,
-        );
+        console.log('🟢 Overpass POIs:', elements.length);
 
         return elements;
       } catch {
-        console.warn(
-          '⚠️ Overpass接続失敗:',
-          url,
-        );
+        console.warn('⚠️ Overpass接続失敗:', url);
       }
     }
 
-    console.warn(
-      '⚠️ すべてのOverpass APIに接続できませんでした',
-    );
+    console.warn('⚠️ すべてのOverpass APIに接続できませんでした');
 
     return [];
   };
@@ -179,9 +158,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   // =========================================================
   // 🔎 検索
   // =========================================================
-  const handleSubmit = async (
-    e: React.FormEvent,
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setError('');
@@ -198,10 +175,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     // 検索履歴
     // =======================================================
     setHistory((prev) => {
-      const newHistory = [
-        key,
-        ...prev.filter((h) => h !== key),
-      ];
+      const newHistory = [key, ...prev.filter((h) => h !== key)];
 
       return newHistory.slice(0, 5);
     });
@@ -211,10 +185,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       // キャッシュ
       // =====================================================
       if (cache.has(key)) {
-        console.log(
-          '✅ キャッシュヒット:',
-          key,
-        );
+        console.log('✅ キャッシュヒット:', key);
 
         const cachedStores = cache.get(key);
 
@@ -240,38 +211,23 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       }
 
       if (!locations.length) {
-        setError(
-          '地域を特定できませんでした。',
-        );
+        setError('地域を特定できませんでした。');
         return;
       }
 
       // =====================================================
       // ③ 座標取得
       // =====================================================
-      const latitude = parseFloat(
-        locations[0].lat,
-      );
+      const latitude = parseFloat(locations[0].lat);
 
-      const longitude = parseFloat(
-        locations[0].lon,
-      );
+      const longitude = parseFloat(locations[0].lon);
 
-      if (
-        Number.isNaN(latitude) ||
-        Number.isNaN(longitude)
-      ) {
-        setError(
-          '座標を取得できませんでした。',
-        );
+      if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+        setError('座標を取得できませんでした。');
         return;
       }
 
-      console.log(
-        '📍 検索地点:',
-        latitude,
-        longitude,
-      );
+      console.log('📍 検索地点:', latitude, longitude);
 
       // 地図を検索地点へ移動
       onSearch(latitude, longitude);
@@ -279,15 +235,9 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       // =====================================================
       // ④ Overpass
       // =====================================================
-      const pois = await fetchOverpassPOIs(
-        latitude,
-        longitude,
-      );
+      const pois = await fetchOverpassPOIs(latitude, longitude);
 
-      console.log(
-        '🏪 取得したPOI:',
-        pois.length,
-      );
+      console.log('🏪 取得したPOI:', pois.length);
 
       // =====================================================
       // ⑤ 店舗データ作成
@@ -298,45 +248,31 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       // =====================================================
       const storeList: Store[] = pois
         .slice(0, 20)
-        .map(
-          (
-            poi: any,
-            index: number,
-          ) => {
-            const tags = poi.tags ?? {};
+        .map((poi: any, index: number) => {
+          const tags = poi.tags ?? {};
 
-            const name =
-              tags.name ||
-              tags.brand ||
-              '名称不明';
+          const name = tags.name || tags.brand || '名称不明';
 
-            const address =
-              tags['addr:full'] ||
-              tags['addr:street'] ||
-              tags['addr:city'] ||
-              '住所不明';
+          const address =
+            tags['addr:full'] ||
+            tags['addr:street'] ||
+            tags['addr:city'] ||
+            '住所不明';
 
-            const website =
-              tags.website ||
-              tags.url ||
-              tags['contact:website'] ||
-              null;
+          const website =
+            tags.website || tags.url || tags['contact:website'] || null;
 
-            return {
-              id: index + 1,
-              name,
-              latitude: poi.lat,
-              longitude: poi.lon,
-              address,
-              website,
-            };
-          },
-        );
+          return {
+            id: index + 1,
+            name,
+            latitude: poi.lat,
+            longitude: poi.lon,
+            address,
+            website,
+          };
+        });
 
-      console.log(
-        '🏪 店舗データ:',
-        storeList.length,
-      );
+      console.log('🏪 店舗データ:', storeList.length);
 
       // =====================================================
       // ⑥ 店舗データをStateへ
@@ -348,22 +284,14 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       // =====================================================
       const newCache = new Map(cache);
 
-      newCache.set(
-        key,
-        storeList,
-      );
+      newCache.set(key, storeList);
 
       setCache(newCache);
       setCacheOn(true);
     } catch (err) {
-      console.error(
-        '❌ 検索処理エラー:',
-        err,
-      );
+      console.error('❌ 検索処理エラー:', err);
 
-      setError(
-        '検索中にエラーが発生しました。',
-      );
+      setError('検索中にエラーが発生しました。');
     } finally {
       setLoading(false);
     }
@@ -372,9 +300,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
   // =========================================================
   // 📜 検索履歴クリック
   // =========================================================
-  const handleHistoryClick = (
-    query: string,
-  ) => {
+  const handleHistoryClick = (query: string) => {
     setInput(query);
 
     setTimeout(() => {
@@ -408,19 +334,9 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
           type="text"
           placeholder="地域名を入力（例: 東京都千代田区丸の内）"
           value={input}
-          onFocus={() =>
-            setIsFocused(true)
-          }
-          onBlur={() =>
-            setTimeout(
-              () =>
-                setIsFocused(false),
-              200,
-            )
-          }
-          onChange={(e) =>
-            setInput(e.target.value)
-          }
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          onChange={(e) => setInput(e.target.value)}
           className="w-full border border-gray-300 sm:flex-1 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
@@ -429,44 +345,28 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
           disabled={loading}
           onClick={cacheDisplay}
           className={`${
-            loading
-              ? 'bg-gray-400'
-              : 'bg-blue-500 hover:bg-blue-600'
+            loading ? 'bg-gray-400' : 'bg-blue-500 hover:bg-blue-600'
           } text-white w-full sm:w-auto px-4 py-2 rounded-lg transition`}
         >
-          {loading
-            ? '検索中…'
-            : '検索'}
+          {loading ? '検索中…' : '検索'}
         </button>
 
-        {!input &&
-          isFocused &&
-          history.length > 0 && (
-            <ul className="absolute bg-white border w-full mt-16 rounded shadow z-[1500]">
-              {history.map(
-                (query, index) => (
-                  <li
-                    key={index}
-                    onMouseDown={() =>
-                      handleHistoryClick(
-                        query,
-                      )
-                    }
-                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {query}
-                  </li>
-                ),
-              )}
-            </ul>
-          )}
+        {!input && isFocused && history.length > 0 && (
+          <ul className="absolute bg-white border w-full mt-16 rounded shadow z-[1500]">
+            {history.map((query, index) => (
+              <li
+                key={index}
+                onMouseDown={() => handleHistoryClick(query)}
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                {query}
+              </li>
+            ))}
+          </ul>
+        )}
       </form>
 
-      {error && (
-        <p className="text-red-500 mt-2">
-          {error}
-        </p>
-      )}
+      {error && <p className="text-red-500 mt-2">{error}</p>}
     </div>
   );
 };
@@ -598,12 +498,12 @@ export default SearchForm;
 //           return parts.join(' ');
 //         }
 //       } catch {
-        
+
 //       return '住所不明';
 //     };
 //     return '住所不明';
 //   }
-  
+
 //     // 🛰️ Overpass API
 //     const fetchOverpassPOIs = async (lat: number, lon: number, radius = 500) => {
 //       const query = `

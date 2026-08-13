@@ -30,7 +30,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
     setIsMapInitialized,
     isMapInitialized,
     selectedStore,
-    stores
+    stores,
   } = useMapStore();
   const markersRef = useRef<L.LayerGroup | null>(null);
 
@@ -76,7 +76,6 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
 
     L.marker(center).addTo(map).bindPopup('中心点');
 
-    
     map.setView(center, 16);
   }, [center]);
 
@@ -92,30 +91,23 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
     const markers = markersRef.current;
     markers.clearLayers();
 
-   
-      stores.forEach((store) => {
-      if (
-        store.latitude !== undefined &&
-        store.longitude !== undefined
-      ) {
+    stores.forEach((store) => {
+      if (store.latitude !== undefined && store.longitude !== undefined) {
         console.log(
           '📍 Adding store marker:',
           store.name,
           store.latitude,
-          store.longitude
+          store.longitude,
         );
 
-        const marker = L.marker([
-          store.latitude,
-          store.longitude,
-        ]).bindPopup(`<b>${store.name}</b>`);
+        const marker = L.marker([store.latitude, store.longitude]).bindPopup(
+          `<b>${store.name}</b>`,
+        );
 
         markers.addLayer(marker);
       }
     });
   }, [stores, isMapInitialized]);
-
-  
 
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -123,10 +115,7 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
 
     const { latitude, longitude, name } = selectedStore;
 
-    if (
-      latitude === undefined ||
-      longitude === undefined
-    ) {
+    if (latitude === undefined || longitude === undefined) {
       return;
     }
 
@@ -139,7 +128,6 @@ const MapCanvas: React.FC<MapCanvasProps> = ({ center }) => {
       .setContent(`<b>${name}</b>`)
       .openOn(map);
   }, [selectedStore]);
-
 
   return (
     <div className="w-full lg:w-2/3 rounded-xl shadow-lg overflow-hidden">
