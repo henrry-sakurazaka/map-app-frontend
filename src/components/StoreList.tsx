@@ -72,7 +72,9 @@ const StoreList: React.FC = () => {
   };
 
   const fetchOgp = async (url: string) => {
-    const res = await fetch(`/api/ogp_preview?url=${encodeURIComponent(url)}`);
+    const res = await fetch(
+      `/api/v1/ogp_preview?url=${encodeURIComponent(url)}`,
+    );
     const data = await res.json();
     setOgpData(data);
   };
@@ -146,7 +148,7 @@ const StoreList: React.FC = () => {
     else if (!store.website) {
       const site = await fetchWebsiteFromDuckDuckGo(store.name);
       if (site) {
-        fetchOgp(site);
+        await fetchOgp(site);
         setSelectedStore({ ...store, website: site });
       } else {
         setOgpData(null);
