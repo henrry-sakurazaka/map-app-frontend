@@ -45,7 +45,7 @@ export async function loginUser(
 // ----------------------
 // 🚨 修正1: 戻り値の型を User から LoginResponse に変更
 
-async function wakeUpServer(): Promise<void> {
+export async function wakeUpServer(): Promise<void> {
   while (true) {
     try {
       const res = await fetch(`${API_BASE}/api/v1/health`);
@@ -54,11 +54,11 @@ async function wakeUpServer(): Promise<void> {
         console.log('Server is ready');
         return;
       }
-    } catch (err) {
-      console.log('Waiting for server to wake up...', err);
+    } catch {
+      console.log('Waiting for server to wake up...');
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 180000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 }
 
@@ -67,7 +67,6 @@ export async function loginGuest(): Promise<LoginResponse> {
 
   // 最大5分待つ
   const MAX_WAIT = 5 * 60 * 1000;
-  await wakeUpServer();
 
   while (Date.now() - start < MAX_WAIT) {
     try {
@@ -104,8 +103,9 @@ export async function loginGuest(): Promise<LoginResponse> {
           name: json.user.name,
         };
       }
-    } catch (err) {
-      console.log('Server still sleeping...', err);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    } catch {
+      console.log('Server still sleeping...');
 
       // 5秒待って再試行
       await new Promise((resolve) => setTimeout(resolve, 5000));
