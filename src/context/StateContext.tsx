@@ -35,6 +35,8 @@ interface MapContextType {
   setStoreWeb: React.Dispatch<React.SetStateAction<Map<string, any>>>;
   ogpData: OGPData | null;
   setOgpData: React.Dispatch<React.SetStateAction<OGPData | null>>;
+  storeFetchError: boolean | null;
+  setStoreFetchError: React.Dispatch<React.SetStateAction<boolean | null>>;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -55,6 +57,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   const [cacheOn, setCacheOn] = useState<boolean>(false);
   const [storeWeb, setStoreWeb] = useState<Map<string, any>>(new Map());
   const [ogpData, setOgpData] = useState<OGPData | null>(null);
+  const [storeFetchError, setStoreFetchError] = useState<boolean | null>(null);
   const focusStore = (store: Store) => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([store.latitude, store.longitude], 14);
@@ -85,6 +88,8 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
         setStoreWeb,
         ogpData,
         setOgpData,
+        storeFetchError,
+        setStoreFetchError,
       }}
     >
       {children}

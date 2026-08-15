@@ -28,6 +28,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     cache,
     setCache,
     setCacheOn,
+    setStoreFetchError,
   } = useMapStore();
 
   // =========================================================
@@ -113,7 +114,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       const res = await fetch(url);
 
       if (!res.ok) {
-        console.warn(`Overpass proxy failed: ${res.status}`);
+        // console.warn(`Overpass proxy failed: ${res.status}`);
+        setStoreFetchError(true);
         return [];
       }
 
@@ -353,4 +355,3 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
 };
 
 export default SearchForm;
-
