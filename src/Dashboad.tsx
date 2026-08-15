@@ -22,6 +22,18 @@ const Dashboad: React.FC = () => {
 
   return (
     <div className="relative flex flex-col items-center bg-gray-700 min-h-screen">
+      {/* 背景のリピート文字 */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden opacity-10">
+        <div className="absolute -inset-20 flex flex-wrap gap-x-8 gap-y-100 rotate-[-30deg] text-gray-400  text-2xl leading-none">
+          {Array.from({ length: 80 }).map((_, index) => (
+            <span key={index} className="whitespace-nowrap">
+              Shop Map App
+            </span>
+          ))}
+        </div>
+      </div>
+      {/* 背景のリピート文字 */}
+
       <button
         onClick={handleLogout}
         className="absolute top-4 right-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
