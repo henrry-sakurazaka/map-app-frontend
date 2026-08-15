@@ -45,11 +45,29 @@ export async function loginUser(
 // ----------------------
 // 🚨 修正1: 戻り値の型を User から LoginResponse に変更
 
+async function wakeUpServer(): Promise<void> {
+  while (true) {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/health`);
+
+      if (res.ok) {
+        console.log('Server is ready');
+        return;
+      }
+    } catch (err) {
+      console.log('Waiting for server to wake up...', err);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 180000));
+  }
+}
+
 export async function loginGuest(): Promise<LoginResponse> {
   const start = Date.now();
 
   // 最大5分待つ
   const MAX_WAIT = 5 * 60 * 1000;
+  await wakeUpServer();
 
   while (Date.now() - start < MAX_WAIT) {
     try {
@@ -67,7 +85,7 @@ export async function loginGuest(): Promise<LoginResponse> {
       if (!res.ok) {
         console.log(`Server waking up... status=${res.status}`);
 
-        await new Promise((resolve) => setTimeout(resolve, 30000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         continue;
       }
 
