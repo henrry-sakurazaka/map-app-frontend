@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 // 🚨 修正1: loginGuest をインポートに追加
-import { loginUser, loginGuest } from '../api/auth';
+import { loginUser, loginGuest, wakeUpServer } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
 import {
   getGoogleOAuthUrl,
@@ -18,6 +18,14 @@ export const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   // useAuth から login 関数を取得
   const { login } = useAuth();
+  const wakeUpStarted = useRef(false);
+
+  useEffect(() => {
+    if (wakeUpStarted.current) return;
+
+    wakeUpStarted.current = true;
+    void wakeUpServer();
+  }, []);
 
   //プロバイダログイン
   const handleProviderLogin = (
