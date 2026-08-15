@@ -62,7 +62,6 @@ async function wakeUpServer(): Promise<void> {
   }
 }
 
-///////////////////////////////////////////////////////////////
 
 export async function loginGuest(): Promise<LoginResponse> {
   const start = Date.now();
