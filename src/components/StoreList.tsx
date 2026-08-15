@@ -54,7 +54,7 @@ const StoreList: React.FC = () => {
   } = useMapStore();
   const allStores = [...sampleStores, ...stores];
   const API_BASE =
-  (import.meta.env.VITE_API_BASE_URL as string) || window.location.origin;
+    (import.meta.env.VITE_API_BASE_URL as string) || window.location.origin;
 
   const fetchWebsiteFromDuckDuckGo = async (
     storeName: string,
