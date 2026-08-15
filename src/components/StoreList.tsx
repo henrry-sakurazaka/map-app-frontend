@@ -50,6 +50,7 @@ const StoreList: React.FC = () => {
     loading,
     ogpData,
     setOgpData,
+    storeFetchError,
   } = useMapStore();
   const allStores = [...sampleStores, ...stores];
 
@@ -235,9 +236,22 @@ const StoreList: React.FC = () => {
           <h2 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2 text-center">
             店舗一覧
           </h2>
-          {stores.length === 0 ? (
+
+          {loading ? (
             <p className="text-blue-400 italic text-center">
-              {loading ? '店舗データを読み込み中…' : '店舗データがありません'}
+              店舗データを読み込み中…
+            </p>
+          ) : storeFetchError ? (
+            <p className="text-green-500 italic text-center">
+              店舗情報を取得できませんでした。
+              <br />
+              APIが混雑している可能性があります。
+              <br />
+              時間を置いて、もう一度お試しください。
+            </p>
+          ) : stores.length === 0 ? (
+            <p className="text-gray-400 italic text-center">
+              店舗データがありません。
             </p>
           ) : (
             allStores.map((store) => (
