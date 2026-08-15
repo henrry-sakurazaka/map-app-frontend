@@ -48,7 +48,7 @@ export async function loginUser(
 async function wakeUpServer(): Promise<void> {
   while (true) {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/health`);
+      const res = await fetch(`${API_BASE}/api/v1/health`);
 
       if (res.ok) {
         console.log('Server is ready');
