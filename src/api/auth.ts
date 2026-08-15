@@ -67,7 +67,7 @@ export async function loginGuest(): Promise<LoginResponse> {
       if (!res.ok) {
         console.log(`Server waking up... status=${res.status}`);
 
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 30000));
         continue;
       }
 
