@@ -53,6 +53,8 @@ const StoreList: React.FC = () => {
     storeFetchError,
   } = useMapStore();
   const allStores = [...sampleStores, ...stores];
+  const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string) || window.location.origin;
 
   const fetchWebsiteFromDuckDuckGo = async (
     storeName: string,
@@ -74,7 +76,7 @@ const StoreList: React.FC = () => {
 
   const fetchOgp = async (url: string) => {
     const res = await fetch(
-      `/api/v1/ogp_preview?url=${encodeURIComponent(url)}`,
+      `${API_BASE}/api/v1/ogp_preview?url=${encodeURIComponent(url)}`,
     );
     const data = await res.json();
     setOgpData(data);
