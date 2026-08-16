@@ -158,7 +158,7 @@ const StoreList: React.FC = () => {
       }
     } else {
       // それ以外はOGPなし
-      setOgpData(null);
+      await fetchOgp(store.website);
     }
   };
 
