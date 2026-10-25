@@ -7,6 +7,8 @@ import SearchForm from './components/SearchForm';
 import StoreList from './components/StoreList';
 import MapCanvas from './components/MapCanvas';
 
+/////////
+
 const Dashboad: React.FC = () => {
   const [center, setCenter] = useState<[number, number] | null>(null);
   const { logout } = useAuth();
