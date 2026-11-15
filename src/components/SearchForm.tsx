@@ -104,6 +104,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
 
     if (!baseUrl) {
       console.error('VITE_API_BASE_URL が設定されていません');
+      setStoreFetchError(true);
       return [];
     }
 
@@ -134,6 +135,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
       );
     } catch (err) {
       console.warn('Overpass API取得失敗:', err);
+      setStoreFetchError(true);
       return [];
     }
   };
@@ -145,6 +147,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
     e.preventDefault();
 
     setError('');
+    setStoreFetchError(false);
 
     const key = input.trim();
 
